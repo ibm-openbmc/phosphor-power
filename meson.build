@@ -87,5 +87,7 @@ subdir('phosphor-regulators')
 subdir('power-sequencer')
 subdir('power-supply')
 subdir('tools/power-utils')
-subdir('test')
+if get_option('tests').enabled()
+    subdir('test')
+endif
 subdir('cold-redundancy')
