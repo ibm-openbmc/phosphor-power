@@ -175,18 +175,15 @@
         {
           "comments": [ "AVDD / TPS546C20",
                         "In schematic: bus 4 (1-based), address 0x24 (8-bit)",
-                        "Note: Does not support the PMBus PAGE command" ],
+                        "Does not have power at standby; cannot be configured",
+                        "Does not support the PMBus PAGE command" ],
           "id": "avdd_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard",
           "i2c_interface": { "bus": 3, "address": "0x12" },
           "rails": [
             {
-              "id": "avdd_rail",
-              "configuration": {
-                "volts": 1.635,
-                "rule_id": "set_voltage_rule"
-              }
+              "id": "avdd_rail"
             }
           ]
         },
@@ -195,7 +192,8 @@
         {
           "comments": [ "3.3VA / TPS549D22",
                         "In schematic: bus 9 (1-based), address 0x36 (8-bit)",
-                        "Note: Does not support the PMBus PAGE command" ],
+                        "Does not have power at standby; cannot be configured",
+                        "Does not support the PMBus PAGE command" ],
           "id": "3_3va_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard",
@@ -211,7 +209,8 @@
         {
           "comments": [ "3.3VB / TPS549D22",
                         "In schematic: bus 4 (1-based), address 0x38 (8-bit)",
-                        "Note: Does not support the PMBus PAGE command" ],
+                        "Does not have power at standby; cannot be configured",
+                        "Does not support the PMBus PAGE command" ],
           "id": "3_3vb_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard",
