@@ -89,8 +89,8 @@
         {
           "comments": [ "Set PMBus IOUT_OC_WARN_LIMIT to 326A to ensure OCW",
                         "asserts at the roll-over bug identified in the",
-                        "Pearson/Saddleback silicon.  326A = 0x08A3.  PMBus",
-                        "requires the low order byte to be written first." ],
+                        "silicon.  326A = 0x08A3.  PMBus requires",
+                        "the low order byte to be written first." ],
           "i2c_write_bytes": { "register": "0x4A", "values": [ "0xA3", "0x08" ] }
         }
       ]
@@ -288,13 +288,13 @@
       "devices": [
         {
           "comments": [ "AVDD / TPS546C20",
-                        "In schematic: bus 4 (1-based), address 0x24 (8-bit)",
+                        "In schematic: bus 4 (1-based), address 0x48 (8-bit)",
                         "Does not have power at standby; cannot be configured",
                         "Does not support the PMBus PAGE command" ],
           "id": "avdd_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard",
-          "i2c_interface": { "bus": 3, "address": "0x12" },
+          "i2c_interface": { "bus": 3, "address": "0x24" },
           "rails": [
             {
               "id": "avdd_rail"
@@ -339,11 +339,11 @@
 
         {
           "comments": [ "VDDp0 DCM 0 / XDPE132G5C: Primary PMBus Interface",
-                        "In schematic: bus 10 (1-based), address 0xE0 (8-bit)" ],
+                        "In schematic: bus 10 (1-based), address 0xE2 (8-bit)" ],
           "id": "vdd_p0_dcm0_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
-          "i2c_interface": { "bus": 9, "address": "0x70" },
+          "i2c_interface": { "bus": 9, "address": "0x71" },
           "rails": [
             {
               "id": "vdd_p0_dcm0_rail",
@@ -357,11 +357,11 @@
 
         {
           "comments": [ "VDDp0 DCM 0 / XDPE132G5C: Secondary I2C Interface",
-                        "In schematic: bus 10 (1-based), address 0x80 (8-bit)" ],
+                        "In schematic: bus 10 (1-based), address 0x82 (8-bit)" ],
           "id": "vdd_p0_dcm0_regulator_i2c",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
-          "i2c_interface": { "bus": 9, "address": "0x40" },
+          "i2c_interface": { "bus": 9, "address": "0x41" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -370,11 +370,11 @@
 
         {
           "comments": [ "VDDp1 DCM 0 / XDPE132G5C: Primary PMBus Interface",
-                        "In schematic: bus 10 (1-based), address 0xE2 (8-bit)" ],
+                        "In schematic: bus 10 (1-based), address 0xE0 (8-bit)" ],
           "id": "vdd_p1_dcm0_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
-          "i2c_interface": { "bus": 9, "address": "0x71" },
+          "i2c_interface": { "bus": 9, "address": "0x70" },
           "rails": [
             {
               "id": "vdd_p1_dcm0_rail",
@@ -388,11 +388,11 @@
 
         {
           "comments": [ "VDDp1 DCM 0 / XDPE132G5C: Secondary I2C Interface",
-                        "In schematic: bus 10 (1-based), address 0x82 (8-bit)" ],
+                        "In schematic: bus 10 (1-based), address 0x80 (8-bit)" ],
           "id": "vdd_p1_dcm0_regulator_i2c",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
-          "i2c_interface": { "bus": 9, "address": "0x41" },
+          "i2c_interface": { "bus": 9, "address": "0x40" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -401,11 +401,11 @@
 
         {
           "comments": [ "VDDp0 DCM 1 / XDPE132G5C: Primary PMBus Interface",
-                        "In schematic: bus 11 (1-based), address 0xE0 (8-bit)" ],
+                        "In schematic: bus 11 (1-based), address 0xE2 (8-bit)" ],
           "id": "vdd_p0_dcm1_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
-          "i2c_interface": { "bus": 10, "address": "0x70" },
+          "i2c_interface": { "bus": 10, "address": "0x71" },
           "rails": [
             {
               "id": "vdd_p0_dcm1_rail",
@@ -419,11 +419,11 @@
 
         {
           "comments": [ "VDDp0 DCM 1 / XDPE132G5C: Secondary I2C Interface",
-                        "In schematic: bus 11 (1-based), address 0x80 (8-bit)" ],
+                        "In schematic: bus 11 (1-based), address 0x82 (8-bit)" ],
           "id": "vdd_p0_dcm1_regulator_i2c",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
-          "i2c_interface": { "bus": 10, "address": "0x40" },
+          "i2c_interface": { "bus": 10, "address": "0x41" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -432,11 +432,11 @@
 
         {
           "comments": [ "VDDp1 DCM 1 / XDPE132G5C: Primary PMBus Interface",
-                        "In schematic: bus 11 (1-based), address 0xE2 (8-bit)" ],
+                        "In schematic: bus 11 (1-based), address 0xE0 (8-bit)" ],
           "id": "vdd_p1_dcm1_regulator",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
-          "i2c_interface": { "bus": 10, "address": "0x71" },
+          "i2c_interface": { "bus": 10, "address": "0x70" },
           "rails": [
             {
               "id": "vdd_p1_dcm1_rail",
@@ -450,11 +450,11 @@
 
         {
           "comments": [ "VDDp1 DCM 1 / XDPE132G5C: Secondary I2C Interface",
-                        "In schematic: bus 11 (1-based), address 0x82 (8-bit)" ],
+                        "In schematic: bus 11 (1-based), address 0x80 (8-bit)" ],
           "id": "vdd_p1_dcm1_regulator_i2c",
           "is_regulator": true,
           "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
-          "i2c_interface": { "bus": 10, "address": "0x41" },
+          "i2c_interface": { "bus": 10, "address": "0x40" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -513,7 +513,7 @@
               "comments": [ "PMBus PAGE 0 rail" ],
               "id": "vio_dcm0_rail",
               "configuration": {
-                "volts": 0.9,
+                "volts": 0.97,
                 "rule_id": "configure_vio_rule"
               }
             },
@@ -593,7 +593,7 @@
               "comments": [ "PMBus PAGE 0 rail" ],
               "id": "vio_dcm1_rail",
               "configuration": {
-                "volts": 0.9,
+                "volts": 0.97,
                 "rule_id": "configure_vio_rule"
               }
             },
