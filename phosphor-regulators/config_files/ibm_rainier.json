@@ -277,6 +277,165 @@
           "i2c_write_byte": { "register": "0x36", "value": "0x06" }
         }
       ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if the current system is a 2S4U/2S2U.",
+                    "2S systems have more regulators on the Nisqually system",
+                    "planar than 1S systems.  Must return true if system is a",
+                    "2S4U/2S2U and false if system is a 1S4U." ],
+      "id": "is_2s_system_rule",
+      "actions": [
+        {
+          "comments": [ "Check whether the CCIN VPD keyword on the Nisqually",
+                        "system planar has the value for 2S4U or 2S2U" ],
+          "or": [
+            { "compare_vpd": { "fru": "system/chassis/motherboard", "keyword": "CCIN", "value": "2E2F" } },
+            { "compare_vpd": { "fru": "system/chassis/motherboard", "keyword": "CCIN", "value": "2E2D" } }
+          ]
+        }
+      ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if the VRM FRU for DCM-1 is present.",
+                    "Must return true if VRM is present and false if VRM is",
+                    "missing." ],
+      "id": "is_dcm1_vrm_present_rule",
+      "actions": [
+        {
+          "comments": [ "Check whether the VRM FRU is present OR the DCM-1",
+                        "FRU is present.  This provides a double check in",
+                        "case the VRM presence line is not working.  If DCM-1",
+                        "is present, the associated VRM should be too." ],
+          "or": [
+            { "compare_presence": { "fru": "system/chassis/motherboard/vdd_vrm1", "value": true } },
+            { "compare_presence": { "fru": "system/chassis/motherboard/cpu2",     "value": true } }
+          ]
+        }
+      ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if a Flett card is present in slot C8.",
+                    "Must return true if present and false otherwise." ],
+      "id": "is_flett_c8_present_rule",
+      "actions": [
+        {
+          "if": {
+            "condition": {
+              "comments": [ "Check if a card is present in slot C8" ],
+              "compare_presence": {
+                "fru": "system/chassis/motherboard/pcie_cable_card8",
+                "value": true
+              }
+            },
+            "then": [
+              {
+                "comments": [ "Check if card has Flett CCIN keyword" ],
+                "compare_vpd": {
+                  "fru": "system/chassis/motherboard/pcie_cable_card8",
+                  "keyword": "CCIN",
+                  "value": "6B87"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if a Flett card is present in slot C9.",
+                    "Must return true if present and false otherwise." ],
+      "id": "is_flett_c9_present_rule",
+      "actions": [
+        {
+          "if": {
+            "condition": {
+              "comments": [ "Check if a card is present in slot C9" ],
+              "compare_presence": {
+                "fru": "system/chassis/motherboard/pcie_cable_card9",
+                "value": true
+              }
+            },
+            "then": [
+              {
+                "comments": [ "Check if card has Flett CCIN keyword" ],
+                "compare_vpd": {
+                  "fru": "system/chassis/motherboard/pcie_cable_card9",
+                  "keyword": "CCIN",
+                  "value": "6B87"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if a Flett card is present in slot C10.",
+                    "Must return true if present and false otherwise." ],
+      "id": "is_flett_c10_present_rule",
+      "actions": [
+        {
+          "if": {
+            "condition": {
+              "comments": [ "Check if a card is present in slot C10" ],
+              "compare_presence": {
+                "fru": "system/chassis/motherboard/pcie_cable_card10",
+                "value": true
+              }
+            },
+            "then": [
+              {
+                "comments": [ "Check if card has Flett CCIN keyword" ],
+                "compare_vpd": {
+                  "fru": "system/chassis/motherboard/pcie_cable_card10",
+                  "keyword": "CCIN",
+                  "value": "6B87"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+
+    {
+      "comments": [ "Rule to determine if a Flett card is present in slot C11.",
+                    "Must return true if present and false otherwise." ],
+      "id": "is_flett_c11_present_rule",
+      "actions": [
+        {
+          "if": {
+            "condition": {
+              "comments": [ "Check if a card is present in slot C11" ],
+              "compare_presence": {
+                "fru": "system/chassis/motherboard/pcie_cable_card11",
+                "value": true
+              }
+            },
+            "then": [
+              {
+                "comments": [ "Check if card has Flett CCIN keyword" ],
+                "compare_vpd": {
+                  "fru": "system/chassis/motherboard/pcie_cable_card11",
+                  "keyword": "CCIN",
+                  "value": "6B87"
+                }
+              }
+            ]
+          }
+        }
+      ]
     }
   ],
 
@@ -293,7 +452,7 @@
                         "Does not support the PMBus PAGE command" ],
           "id": "avdd_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 3, "address": "0x24" },
           "rails": [
             {
@@ -310,7 +469,7 @@
                         "Does not support the PMBus PAGE command" ],
           "id": "3_3va_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 8, "address": "0x1B" },
           "rails": [
             {
@@ -327,7 +486,7 @@
                         "Does not support the PMBus PAGE command" ],
           "id": "3_3vb_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 3, "address": "0x1C" },
           "rails": [
             {
@@ -342,7 +501,7 @@
                         "In schematic: bus 10 (1-based), address 0xE2 (8-bit)" ],
           "id": "vdd_p0_dcm0_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x71" },
           "rails": [
             {
@@ -360,7 +519,7 @@
                         "In schematic: bus 10 (1-based), address 0x82 (8-bit)" ],
           "id": "vdd_p0_dcm0_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x41" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
@@ -373,7 +532,7 @@
                         "In schematic: bus 10 (1-based), address 0xE0 (8-bit)" ],
           "id": "vdd_p1_dcm0_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x70" },
           "rails": [
             {
@@ -391,7 +550,7 @@
                         "In schematic: bus 10 (1-based), address 0x80 (8-bit)" ],
           "id": "vdd_p1_dcm0_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector0/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x40" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
@@ -404,8 +563,9 @@
                         "In schematic: bus 11 (1-based), address 0xE2 (8-bit)" ],
           "id": "vdd_p0_dcm1_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm1",
           "i2c_interface": { "bus": 10, "address": "0x71" },
+          "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "rails": [
             {
               "id": "vdd_p0_dcm1_rail",
@@ -422,8 +582,9 @@
                         "In schematic: bus 11 (1-based), address 0x82 (8-bit)" ],
           "id": "vdd_p0_dcm1_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm1",
           "i2c_interface": { "bus": 10, "address": "0x41" },
+          "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -435,8 +596,9 @@
                         "In schematic: bus 11 (1-based), address 0xE0 (8-bit)" ],
           "id": "vdd_p1_dcm1_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm1",
           "i2c_interface": { "bus": 10, "address": "0x70" },
+          "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "rails": [
             {
               "id": "vdd_p1_dcm1_rail",
@@ -453,8 +615,9 @@
                         "In schematic: bus 11 (1-based), address 0x80 (8-bit)" ],
           "id": "vdd_p1_dcm1_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/vdd-vrm-connector1/vdd-vrm",
+          "fru": "system/chassis/motherboard/vdd_vrm1",
           "i2c_interface": { "bus": 10, "address": "0x40" },
+          "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
           }
@@ -466,7 +629,7 @@
                         "In schematic: bus 10 (1-based), address 0xE4 (8-bit)" ],
           "id": "vdn_vcs_p0_dcm0_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x72" },
           "rails": [
             {
@@ -493,7 +656,7 @@
                         "In schematic: bus 10 (1-based), address 0x84 (8-bit)" ],
           "id": "vdn_vcs_p0_dcm0_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x42" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_ir35221_rule"
@@ -506,7 +669,7 @@
                         "In schematic: bus 10 (1-based), address 0xE6 (8-bit)" ],
           "id": "vio_vcs_p1_dcm0_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x73" },
           "rails": [
             {
@@ -533,7 +696,7 @@
                         "In schematic: bus 10 (1-based), address 0x86 (8-bit)" ],
           "id": "vio_vcs_p1_dcm0_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x43" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_ir35221_rule"
@@ -546,8 +709,9 @@
                         "In schematic: bus 11 (1-based), address 0xE4 (8-bit)" ],
           "id": "vdn_vcs_p0_dcm1_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x72" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
           "rails": [
             {
               "comments": [ "PMBus PAGE 0 rail" ],
@@ -573,8 +737,9 @@
                         "In schematic: bus 11 (1-based), address 0x84 (8-bit)" ],
           "id": "vdn_vcs_p0_dcm1_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x42" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_ir35221_rule"
           }
@@ -586,8 +751,9 @@
                         "In schematic: bus 11 (1-based), address 0xE6 (8-bit)" ],
           "id": "vio_vcs_p1_dcm1_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x73" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
           "rails": [
             {
               "comments": [ "PMBus PAGE 0 rail" ],
@@ -613,8 +779,9 @@
                         "In schematic: bus 11 (1-based), address 0x86 (8-bit)" ],
           "id": "vio_vcs_p1_dcm1_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x43" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
           "configuration": {
             "rule_id": "set_avsbus_timeout_ir35221_rule"
           }
@@ -626,7 +793,7 @@
                         "In schematic: bus 10 (1-based), address 0xE8 (8-bit)" ],
           "id": "vpcie_dcm0_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x74" },
           "rails": [
             {
@@ -644,7 +811,7 @@
                         "In schematic: bus 10 (1-based), address 0x88 (8-bit)" ],
           "id": "vpcie_dcm0_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x44" }
         },
 
@@ -654,8 +821,9 @@
                         "In schematic: bus 11 (1-based), address 0xE8 (8-bit)" ],
           "id": "vpcie_dcm1_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
+          "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x74" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
           "rails": [
             {
               "id": "vpcie_dcm1_rail",
@@ -672,8 +840,9 @@
                         "In schematic: bus 11 (1-based), address 0x88 (8-bit)" ],
           "id": "vpcie_dcm1_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard",
-          "i2c_interface": { "bus": 10, "address": "0x44" }
+          "fru": "system/chassis/motherboard",
+          "i2c_interface": { "bus": 10, "address": "0x44" },
+          "presence_detection": { "rule_id": "is_2s_system_rule" }
         },
 
 
@@ -682,8 +851,9 @@
                         "In schematic: bus 7 (1-based), address 0xEC (8-bit)" ],
           "id": "flett_slot_c8_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x89/pcie-cable-card",
+          "fru": "system/chassis/motherboard/pcie_cable_card8",
           "i2c_interface": { "bus": 6, "address": "0x76" },
+          "presence_detection": { "rule_id": "is_flett_c8_present_rule" },
           "rails": [
             {
               "id": "flett_slot_c8_rail"
@@ -696,8 +866,9 @@
                         "In schematic: bus 7 (1-based), address 0x8C (8-bit)" ],
           "id": "flett_slot_c8_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x89/pcie-cable-card",
-          "i2c_interface": { "bus": 6, "address": "0x46" }
+          "fru": "system/chassis/motherboard/pcie_cable_card8",
+          "i2c_interface": { "bus": 6, "address": "0x46" },
+          "presence_detection": { "rule_id": "is_flett_c8_present_rule" }
         },
 
 
@@ -706,8 +877,9 @@
                         "In schematic: bus 7 (1-based), address 0xFA (8-bit)" ],
           "id": "flett_slot_c9_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x86/pcie-cable-card",
+          "fru": "system/chassis/motherboard/pcie_cable_card9",
           "i2c_interface": { "bus": 6, "address": "0x7D" },
+          "presence_detection": { "rule_id": "is_flett_c9_present_rule" },
           "rails": [
             {
               "id": "flett_slot_c9_rail"
@@ -720,8 +892,9 @@
                         "In schematic: bus 7 (1-based), address 0x9A (8-bit)" ],
           "id": "flett_slot_c9_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x86/pcie-cable-card",
-          "i2c_interface": { "bus": 6, "address": "0x4D" }
+          "fru": "system/chassis/motherboard/pcie_cable_card9",
+          "i2c_interface": { "bus": 6, "address": "0x4D" },
+          "presence_detection": { "rule_id": "is_flett_c9_present_rule" }
         },
 
 
@@ -730,8 +903,9 @@
                         "In schematic: bus 12 (1-based), address 0xEC (8-bit)" ],
           "id": "flett_slot_c11_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x87/pcie-cable-card",
+          "fru": "system/chassis/motherboard/pcie_cable_card11",
           "i2c_interface": { "bus": 11, "address": "0x76" },
+          "presence_detection": { "rule_id": "is_flett_c11_present_rule" },
           "rails": [
             {
               "id": "flett_slot_c11_rail"
@@ -744,8 +918,9 @@
                         "In schematic: bus 12 (1-based), address 0x8C (8-bit)" ],
           "id": "flett_slot_c11_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x87/pcie-cable-card",
-          "i2c_interface": { "bus": 11, "address": "0x46" }
+          "fru": "system/chassis/motherboard/pcie_cable_card11",
+          "i2c_interface": { "bus": 11, "address": "0x46" },
+          "presence_detection": { "rule_id": "is_flett_c11_present_rule" }
         },
 
 
@@ -754,8 +929,9 @@
                         "In schematic: bus 12 (1-based), address 0xFA (8-bit)" ],
           "id": "flett_slot_c10_regulator",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x163/pcie-cable-card",
+          "fru": "system/chassis/motherboard/pcie_cable_card10",
           "i2c_interface": { "bus": 11, "address": "0x7D" },
+          "presence_detection": { "rule_id": "is_flett_c10_present_rule" },
           "rails": [
             {
               "id": "flett_slot_c10_rail"
@@ -768,8 +944,9 @@
                         "In schematic: bus 12 (1-based), address 0x9A (8-bit)" ],
           "id": "flett_slot_c10_regulator_i2c",
           "is_regulator": true,
-          "fru": "/system/chassis/motherboard/pcieslot-x163/pcie-cable-card",
-          "i2c_interface": { "bus": 11, "address": "0x4D" }
+          "fru": "system/chassis/motherboard/pcie_cable_card10",
+          "i2c_interface": { "bus": 11, "address": "0x4D" },
+          "presence_detection": { "rule_id": "is_flett_c10_present_rule" }
         }
       ]
     }
