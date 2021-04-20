@@ -361,13 +361,10 @@ void PSUManager::analyze()
             // TODO: Fault priorities #918
             if (!psu->isFaultLogged() && !psu->isPresent())
             {
-                // Create error for power supply missing.
-                additionalData["CALLOUT_INVENTORY_PATH"] =
-                    psu->getInventoryPath();
-                additionalData["CALLOUT_PRIORITY"] = "H";
-                createError(
-                    "xyz.openbmc_project.Power.PowerSupply.Error.Missing",
-                    additionalData);
+                log<level::INFO>(
+                    fmt::format("Skip logging missing error for {}",
+                                psu->getInventoryPath())
+                        .c_str());
                 psu->setFaultLogged();
             }
             else if (!psu->isFaultLogged() && psu->isFaulted())
