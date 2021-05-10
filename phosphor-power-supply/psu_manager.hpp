@@ -11,8 +11,8 @@
 
 struct sys_properties
 {
-    int minPowerSupplies;
     int maxPowerSupplies;
+    int inputVoltage;
 };
 
 using namespace phosphor::power::psu;
@@ -38,18 +38,32 @@ class PSUManager
     PSUManager& operator=(PSUManager&&) = delete;
 
     /**
-     * Constructor
+     * Constructor to read configuration from D-Bus.
      *
      * @param[in] bus - D-Bus bus object
      * @param[in] e - event object
-     * @param[in] configfile - string path to the configuration file
      */
-    PSUManager(sdbusplus::bus::bus& bus, const sdeventplus::Event& e,
-               const std::string& configfile);
+    PSUManager(sdbusplus::bus::bus& bus, const sdeventplus::Event& e);
 
-    void getJSONProperties(const std::string& path, sdbusplus::bus::bus& bus,
-                           sys_properties& p,
-                           std::vector<std::unique_ptr<PowerSupply>>& psus);
+    /**
+     * Get PSU properties from D-Bus, use that to build a power supply
+     * object.
+     *
+     * @param[in] properties - A map of property names and values
+     *
+     */
+    void getPSUProperties(util::DbusPropertyMap& properties);
+
+    /**
+     * Get PSU configuration from D-Bus
+     */
+    void getPSUConfiguration();
+
+    /**
+     * @brief Initialize the system properties from the Supported Configuration
+     *        D-Bus object provided by Entity Manager.
+     */
+    void getSystemProperties();
 
     /**
      * Initializes the manager.
@@ -161,6 +175,9 @@ class PSUManager
     /** @brief Used to subscribe to D-Bus power on state changes */
     std::unique_ptr<sdbusplus::bus::match_t> powerOnMatch;
 
+    /** @brief Used to subscribe to Entity Manager interfaces added */
+    std::unique_ptr<sdbusplus::bus::match_t> entityManagerIfacesAddedMatch;
+
     /**
      * @brief Callback for power state property changes
      *
@@ -169,6 +186,16 @@ class PSUManager
      * @param[in] msg - Data associated with the power state signal
      */
     void powerStateChanged(sdbusplus::message::message& msg);
+
+    /**
+     * @brief Callback for entity-manager interface added
+     *
+     * Process the information from the supported configuration and or IBM CFFPS
+     * Connector interface being added.
+     *
+     * @param[in] msg - Data associated with the interfaces added signal
+     */
+    void entityManagerIfaceAdded(sdbusplus::message::message& msg);
 
     /**
      * @brief Adds properties to the inventory.
@@ -188,14 +215,17 @@ class PSUManager
     }
 
     /**
-     * @brief Minimum number of power supplies to operate.
+     * @brief Helper function to populate the system properties
+     *
+     * @param[in] properties - A map of property names and values
      */
-    int minPSUs = 1;
+    void populateSysProperties(const util::DbusPropertyMap& properties);
 
     /**
-     * @brief Maximum number of power supplies possible.
+     * @brief Map of supported PSU configurations that include the model name
+     * and their properties.
      */
-    int maxPSUs = 1;
+    std::multimap<std::string, sys_properties> supportedConfigs;
 
     /**
      * @brief The vector for power supplies.

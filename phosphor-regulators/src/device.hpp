@@ -87,6 +87,11 @@ class Device
     void addToIDMap(IDMap& idMap);
 
     /**
+     * Clear any cached data about hardware devices.
+     */
+    void clearCache();
+
+    /**
      * Closes this device.
      *
      * Closes any interfaces that are open to this device.  Releases any other
@@ -176,6 +181,25 @@ class Device
     const std::vector<std::unique_ptr<Rail>>& getRails() const
     {
         return rails;
+    }
+
+    /**
+     * Returns whether this device is present.
+     *
+     * @return true if device is present, false otherwise
+     */
+    bool isPresent(Services& services, System& system, Chassis& chassis)
+    {
+        if (presenceDetection)
+        {
+            // Execute presence detection to determine if device is present
+            return presenceDetection->execute(services, system, chassis, *this);
+        }
+        else
+        {
+            // No presence detection defined; assume device is present
+            return true;
+        }
     }
 
     /**

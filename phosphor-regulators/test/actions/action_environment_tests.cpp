@@ -17,6 +17,7 @@
 #include "device.hpp"
 #include "i2c_interface.hpp"
 #include "id_map.hpp"
+#include "mock_services.hpp"
 #include "mocked_i2c_interface.hpp"
 #include "pmbus_utils.hpp"
 #include "rule.hpp"
@@ -37,17 +38,22 @@ TEST(ActionEnvironmentTests, Constructor)
     // Create IDMap
     IDMap idMap{};
 
+    // Create mock services.
+    MockServices services{};
+
     // Create Device and add to IDMap
     std::unique_ptr<i2c::I2CInterface> i2cInterface =
         i2c::create(1, 0x70, i2c::I2CInterface::InitialState::CLOSED);
-    Device reg1{"regulator1", true, "/system/chassis/motherboard/reg1",
-                std::move(i2cInterface)};
+    Device reg1{
+        "regulator1", true,
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/reg1",
+        std::move(i2cInterface)};
     idMap.addDevice(reg1);
 
     // Verify object state after constructor
     try
     {
-        ActionEnvironment env{idMap, "regulator1"};
+        ActionEnvironment env{idMap, "regulator1", services};
         EXPECT_EQ(env.getDevice().getID(), "regulator1");
         EXPECT_EQ(env.getDeviceID(), "regulator1");
         EXPECT_EQ(env.getRuleDepth(), 0);
@@ -62,7 +68,8 @@ TEST(ActionEnvironmentTests, Constructor)
 TEST(ActionEnvironmentTests, AddSensorReading)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     pmbus_utils::SensorReading reading;
     reading.type = pmbus_utils::SensorValueType::iout;
     reading.value = 1;
@@ -84,7 +91,8 @@ TEST(ActionEnvironmentTests, AddSensorReading)
 TEST(ActionEnvironmentTests, DecrementRuleDepth)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     EXPECT_EQ(env.getRuleDepth(), 0);
     env.incrementRuleDepth("set_voltage_rule");
     env.incrementRuleDepth("set_voltage_rule");
@@ -102,14 +110,19 @@ TEST(ActionEnvironmentTests, GetDevice)
     // Create IDMap
     IDMap idMap{};
 
+    // Create mock services.
+    MockServices services{};
+
     // Create Device and add to IDMap
     std::unique_ptr<i2c::I2CInterface> i2cInterface =
         i2c::create(1, 0x70, i2c::I2CInterface::InitialState::CLOSED);
-    Device reg1{"regulator1", true, "/system/chassis/motherboard/reg1",
-                std::move(i2cInterface)};
+    Device reg1{
+        "regulator1", true,
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/reg1",
+        std::move(i2cInterface)};
     idMap.addDevice(reg1);
 
-    ActionEnvironment env{idMap, "regulator1"};
+    ActionEnvironment env{idMap, "regulator1", services};
 
     // Test where current device ID is in the IDMap
     try
@@ -144,7 +157,8 @@ TEST(ActionEnvironmentTests, GetDevice)
 TEST(ActionEnvironmentTests, GetDeviceID)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     EXPECT_EQ(env.getDeviceID(), "");
     env.setDeviceID("regulator1");
     EXPECT_EQ(env.getDeviceID(), "regulator1");
@@ -154,11 +168,15 @@ TEST(ActionEnvironmentTests, GetRule)
 {
     // Create IDMap
     IDMap idMap{};
+
+    // Create mock services.
+    MockServices services{};
+
     Rule setVoltageRule{"set_voltage_rule",
                         std::vector<std::unique_ptr<Action>>{}};
     idMap.addRule(setVoltageRule);
 
-    ActionEnvironment env{idMap, ""};
+    ActionEnvironment env{idMap, "", services};
 
     // Test where rule ID is in the IDMap
     try
@@ -192,7 +210,8 @@ TEST(ActionEnvironmentTests, GetRule)
 TEST(ActionEnvironmentTests, GetRuleDepth)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     EXPECT_EQ(env.getRuleDepth(), 0);
     env.incrementRuleDepth("set_voltage_rule");
     EXPECT_EQ(env.getRuleDepth(), 1);
@@ -207,7 +226,8 @@ TEST(ActionEnvironmentTests, GetRuleDepth)
 TEST(ActionEnvironmentTests, GetSensorReadings)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     pmbus_utils::SensorReading reading;
     reading.type = pmbus_utils::SensorValueType::pout;
     reading.value = 1.3;
@@ -226,10 +246,19 @@ TEST(ActionEnvironmentTests, GetSensorReadings)
     EXPECT_EQ(env.getSensorReadings()[1].value, -1);
 }
 
+TEST(ActionEnvironmentTests, GetServices)
+{
+    IDMap idMap{};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
+    EXPECT_EQ(&(env.getServices()), &services);
+}
+
 TEST(ActionEnvironmentTests, GetVolts)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     EXPECT_EQ(env.getVolts().has_value(), false);
     env.setVolts(1.31);
     EXPECT_EQ(env.getVolts().has_value(), true);
@@ -239,7 +268,8 @@ TEST(ActionEnvironmentTests, GetVolts)
 TEST(ActionEnvironmentTests, IncrementRuleDepth)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, ""};
+    MockServices services{};
+    ActionEnvironment env{idMap, "", services};
     EXPECT_EQ(env.getRuleDepth(), 0);
 
     // Test where rule depth has not exceeded maximum
@@ -275,7 +305,8 @@ TEST(ActionEnvironmentTests, IncrementRuleDepth)
 TEST(ActionEnvironmentTests, SetDeviceID)
 {
     IDMap idMap{};
-    ActionEnvironment env{idMap, "regulator1"};
+    MockServices services{};
+    ActionEnvironment env{idMap, "regulator1", services};
     EXPECT_EQ(env.getDeviceID(), "regulator1");
     env.setDeviceID("regulator2");
     EXPECT_EQ(env.getDeviceID(), "regulator2");
@@ -286,7 +317,8 @@ TEST(ActionEnvironmentTests, SetVolts)
     try
     {
         IDMap idMap{};
-        ActionEnvironment env{idMap, ""};
+        MockServices services{};
+        ActionEnvironment env{idMap, "", services};
         EXPECT_EQ(env.getVolts().has_value(), false);
         env.setVolts(2.35);
         EXPECT_EQ(env.getVolts().has_value(), true);

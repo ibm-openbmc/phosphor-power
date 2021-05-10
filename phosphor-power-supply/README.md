@@ -7,27 +7,28 @@ Design document: https://github.com/openbmc/docs/blob/master/designs/psu-monitor
 To enable reading VPD data via PMBus commands to IBM common form factor
 power supplies (ibm-cffps), run meson with `-Dibm-vpd=true`.
 
-# JSON Configuration File
+# D-Bus System Configuration
 
-The JSON configuration file should contain:
+Entity Manager provides information about the supported system configuration
+and the power supply connectors (IBMCFFPSConnector).
 
-## MinPowerSupplies
-Optional property, integer, that indicates the minimum number of power supplies
-that should be present.
+The information is as follows:
 
-## MaxPowerSupplies
-Optional property, integer, that indicates the maximum number of power supplies
-that should be present.
+## Max Power Supplies
+Integer that indicates the maximum number of power supplies that should be
+present. This is exposed via the `MaxCount` property.
 
-## PowerSupplies
-An array of power supply properties.
+## I2C Bus
+The I2C bus(es) that the power supply is on will be represented by the `I2CBus`
+property under the `xyz.openbmc_project.Configuration.IBMCFFPSConnector`
+interface(s).
 
-### Inventory
-The D-Bus path used to check the power supply presence (Present) property.
+## I2C Address
+The I2C address(es) that the power supply is at will be represented by the
+`I2CAddress` property under the IBMCFFPSConnector interface(s).
 
-### Bus
-An integer specifying the I2C bus that the PMBus power supply is on.
-
-### Address
-A string representing the 16-bit I2C address of the PMBus power supply.
-
+## Name
+The `Name` property under the IBMCFFPSConnector interface(s) will be used to
+create an inventory path for the power supply. This inventory path is used as
+part of the power supply presence detection, reading the `Present` property
+under this path.

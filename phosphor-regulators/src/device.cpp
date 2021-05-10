@@ -17,6 +17,7 @@
 #include "device.hpp"
 
 #include "chassis.hpp"
+#include "error_logging_utils.hpp"
 #include "exception_utils.hpp"
 #include "system.hpp"
 
@@ -37,6 +38,16 @@ void Device::addToIDMap(IDMap& idMap)
     }
 }
 
+void Device::clearCache()
+{
+    // If presence detection is defined for this device
+    if (presenceDetection)
+    {
+        // Clear cached presence data
+        presenceDetection->clearCache();
+    }
+}
+
 void Device::close(Services& services)
 {
     try
@@ -53,33 +64,42 @@ void Device::close(Services& services)
         services.getJournal().logError(exception_utils::getMessages(e));
         services.getJournal().logError("Unable to close device " + id);
 
-        // TODO: Create error log entry
+        // Create error log entry
+        error_logging_utils::logError(std::current_exception(),
+                                      Entry::Level::Notice, services);
     }
 }
 
 void Device::configure(Services& services, System& system, Chassis& chassis)
 {
-    // If configuration changes are defined for this device, apply them
-    if (configuration)
+    // Verify device is present
+    if (isPresent(services, system, chassis))
     {
-        configuration->execute(services, system, chassis, *this);
-    }
+        // If configuration changes are defined for this device, apply them
+        if (configuration)
+        {
+            configuration->execute(services, system, chassis, *this);
+        }
 
-    // Configure rails
-    for (std::unique_ptr<Rail>& rail : rails)
-    {
-        rail->configure(services, system, chassis, *this);
+        // Configure rails
+        for (std::unique_ptr<Rail>& rail : rails)
+        {
+            rail->configure(services, system, chassis, *this);
+        }
     }
 }
 
 void Device::monitorSensors(Services& services, System& system,
                             Chassis& chassis)
 {
-
-    // Monitor sensors in each rail
-    for (std::unique_ptr<Rail>& rail : rails)
+    // Verify device is present
+    if (isPresent(services, system, chassis))
     {
-        rail->monitorSensors(services, system, chassis, *this);
+        // Monitor sensors in each rail
+        for (std::unique_ptr<Rail>& rail : rails)
+        {
+            rail->monitorSensors(services, system, chassis, *this);
+        }
     }
 }
 

@@ -11,21 +11,35 @@ using namespace phosphor::logging;
 namespace phosphor::power::manager
 {
 
-PSUManager::PSUManager(sdbusplus::bus::bus& bus, const sdeventplus::Event& e,
-                       const std::string& configfile) :
+constexpr auto IBMCFFPSInterface =
+    "xyz.openbmc_project.Configuration.IBMCFFPSConnector";
+constexpr auto i2cBusProp = "I2CBus";
+constexpr auto i2cAddressProp = "I2CAddress";
+constexpr auto psuNameProp = "Name";
+
+constexpr auto supportedConfIntf =
+    "xyz.openbmc_project.Configuration.SupportedConfiguration";
+
+PSUManager::PSUManager(sdbusplus::bus::bus& bus, const sdeventplus::Event& e) :
     bus(bus)
 {
-    // Parse out the JSON properties
-    sys_properties properties;
-    getJSONProperties(configfile, bus, properties, psus);
+    // Subscribe to InterfacesAdded before doing a property read, otherwise
+    // the interface could be created after the read attempt but before the
+    // match is created.
+    entityManagerIfacesAddedMatch = std::make_unique<sdbusplus::bus::match_t>(
+        bus,
+        sdbusplus::bus::match::rules::interfacesAdded() +
+            sdbusplus::bus::match::rules::sender(
+                "xyz.openbmc_project.EntityManager"),
+        std::bind(&PSUManager::entityManagerIfaceAdded, this,
+                  std::placeholders::_1));
+    getPSUConfiguration();
+    getSystemProperties();
 
     using namespace sdeventplus;
     auto interval = std::chrono::milliseconds(1000);
     timer = std::make_unique<utility::Timer<ClockId::Monotonic>>(
         e, std::bind(&PSUManager::analyze, this), interval);
-
-    minPSUs = {properties.minPowerSupplies};
-    maxPSUs = {properties.maxPowerSupplies};
 
     // Subscribe to power state changes
     powerService = util::getService(POWER_OBJ_PATH, POWER_IFACE, bus);
@@ -38,68 +52,210 @@ PSUManager::PSUManager(sdbusplus::bus::bus& bus, const sdeventplus::Event& e,
     initialize();
 }
 
-void PSUManager::getJSONProperties(
-    const std::string& path, sdbusplus::bus::bus& bus, sys_properties& p,
-    std::vector<std::unique_ptr<PowerSupply>>& psus)
+void PSUManager::getPSUConfiguration()
 {
-    nlohmann::json configFileJSON = util::loadJSONFromFile(path.c_str());
+    using namespace phosphor::power::util;
+    auto depth = 0;
+    auto objects = getSubTree(bus, "/", IBMCFFPSInterface, depth);
 
-    if (configFileJSON == nullptr)
-    {
-        throw std::runtime_error("Failed to load JSON configuration file");
-    }
+    psus.clear();
 
-    if (!configFileJSON.contains("SystemProperties"))
+    // I should get a map of objects back.
+    // Each object will have a path, a service, and an interface.
+    // The interface should match the one passed into this function.
+    for (const auto& [path, services] : objects)
     {
-        throw std::runtime_error("Missing required SystemProperties");
-    }
+        auto service = services.begin()->first;
 
-    if (!configFileJSON.contains("PowerSupplies"))
-    {
-        throw std::runtime_error("Missing required PowerSupplies");
-    }
-
-    auto sysProps = configFileJSON["SystemProperties"];
-
-    if (sysProps.contains("MinPowerSupplies"))
-    {
-        p.minPowerSupplies = sysProps["MinPowerSupplies"];
-    }
-    else
-    {
-        p.minPowerSupplies = 0;
-    }
-
-    if (sysProps.contains("MaxPowerSupplies"))
-    {
-        p.maxPowerSupplies = sysProps["MaxPowerSupplies"];
-    }
-    else
-    {
-        p.maxPowerSupplies = 0;
-    }
-
-    for (auto psuJSON : configFileJSON["PowerSupplies"])
-    {
-        if (psuJSON.contains("Inventory") && psuJSON.contains("Bus") &&
-            psuJSON.contains("Address"))
+        if (path.empty() || service.empty())
         {
-            std::string invpath = psuJSON["Inventory"];
-            std::uint8_t i2cbus = psuJSON["Bus"];
-            std::string i2caddr = psuJSON["Address"];
-            auto psu =
-                std::make_unique<PowerSupply>(bus, invpath, i2cbus, i2caddr);
-            psus.emplace_back(std::move(psu));
+            continue;
         }
-        else
-        {
-            log<level::ERR>("Insufficient PowerSupply properties");
-        }
+
+        // For each object in the array of objects, I want to get properties
+        // from the service, path, and interface.
+        auto properties =
+            getAllProperties(bus, path, IBMCFFPSInterface, service);
+
+        getPSUProperties(properties);
     }
 
     if (psus.empty())
     {
-        throw std::runtime_error("No power supplies to monitor");
+        // Interface or properties not found. Let the Interfaces Added callback
+        // process the information once the interfaces are added to D-Bus.
+        log<level::INFO>(fmt::format("No power supplies to monitor").c_str());
+    }
+}
+
+void PSUManager::getPSUProperties(util::DbusPropertyMap& properties)
+{
+    // From passed in properties, I want to get: I2CBus, I2CAddress,
+    // and Name. Create a power supply object, using Name to build the inventory
+    // path.
+    const auto basePSUInvPath =
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply";
+    uint64_t* i2cbus = nullptr;
+    uint64_t* i2caddr = nullptr;
+    std::string* psuname = nullptr;
+
+    for (const auto& property : properties)
+    {
+        try
+        {
+            if (property.first == i2cBusProp)
+            {
+                i2cbus = std::get_if<uint64_t>(&properties[i2cBusProp]);
+            }
+            else if (property.first == i2cAddressProp)
+            {
+                i2caddr = std::get_if<uint64_t>(&properties[i2cAddressProp]);
+            }
+            else if (property.first == psuNameProp)
+            {
+                psuname = std::get_if<std::string>(&properties[psuNameProp]);
+            }
+        }
+        catch (std::exception& e)
+        {
+        }
+    }
+
+    if ((i2cbus) && (i2caddr) && (psuname) && (!psuname->empty()))
+    {
+        std::string invpath = basePSUInvPath;
+        invpath.push_back(psuname->back());
+
+        log<level::DEBUG>(fmt::format("Inventory Path: {}", invpath).c_str());
+
+        auto psu =
+            std::make_unique<PowerSupply>(bus, invpath, *i2cbus, *i2caddr);
+        psus.emplace_back(std::move(psu));
+    }
+
+    if (psus.empty())
+    {
+        log<level::INFO>(fmt::format("No power supplies to monitor").c_str());
+    }
+}
+
+void PSUManager::populateSysProperties(const util::DbusPropertyMap& properties)
+{
+    try
+    {
+        auto propIt = properties.find("SupportedType");
+        if (propIt == properties.end())
+        {
+            return;
+        }
+        const std::string* type = std::get_if<std::string>(&(propIt->second));
+        if ((type == nullptr) || (*type != "PowerSupply"))
+        {
+            return;
+        }
+
+        std::vector<std::string> models;
+        propIt = properties.find("SupportedModel");
+        if (propIt == properties.end())
+        {
+            return;
+        }
+        const std::vector<std::string>* modelsPtr =
+            std::get_if<std::vector<std::string>>(&(propIt->second));
+        if (modelsPtr == nullptr)
+        {
+            return;
+        }
+        models = *modelsPtr;
+
+        sys_properties sys{0, 0};
+        propIt = properties.find("RedundantCount");
+        if (propIt != properties.end())
+        {
+            const uint64_t* count = std::get_if<uint64_t>(&(propIt->second));
+            if (count != nullptr)
+            {
+                sys.maxPowerSupplies = *count;
+            }
+        }
+        propIt = properties.find("InputVoltage");
+        if (propIt != properties.end())
+        {
+            const uint64_t* voltage = std::get_if<uint64_t>(&(propIt->second));
+            if (voltage != nullptr)
+            {
+                sys.inputVoltage = *voltage;
+            }
+        }
+
+        for (const auto& model : models)
+        {
+            supportedConfigs.insert(std::make_pair(model, sys));
+        }
+    }
+    catch (std::exception& e)
+    {
+    }
+}
+
+void PSUManager::getSystemProperties()
+{
+
+    try
+    {
+        util::DbusSubtree subtree =
+            util::getSubTree(bus, INVENTORY_OBJ_PATH, supportedConfIntf, 0);
+        if (subtree.empty())
+        {
+            throw std::runtime_error("Supported Configuration Not Found");
+        }
+
+        for (const auto& [objPath, services] : subtree)
+        {
+            std::string service = services.begin()->first;
+            if (objPath.empty() || service.empty())
+            {
+                continue;
+            }
+            auto properties = util::getAllProperties(
+                bus, objPath, supportedConfIntf, service);
+            populateSysProperties(properties);
+        }
+    }
+    catch (std::exception& e)
+    {
+        // Interface or property not found. Let the Interfaces Added callback
+        // process the information once the interfaces are added to D-Bus.
+    }
+}
+
+void PSUManager::entityManagerIfaceAdded(sdbusplus::message::message& msg)
+{
+    try
+    {
+        sdbusplus::message::object_path objPath;
+        std::map<std::string, std::map<std::string, util::DbusVariant>>
+            interfaces;
+        msg.read(objPath, interfaces);
+
+        auto itIntf = interfaces.find(supportedConfIntf);
+        if (itIntf != interfaces.cend())
+        {
+            populateSysProperties(itIntf->second);
+        }
+
+        itIntf = interfaces.find(IBMCFFPSInterface);
+        if (itIntf != interfaces.cend())
+        {
+            log<level::INFO>(
+                fmt::format("InterfacesAdded for: {}", IBMCFFPSInterface)
+                    .c_str());
+            getPSUProperties(itIntf->second);
+        }
+    }
+    catch (std::exception& e)
+    {
+        // Ignore, the property may be of a different type than expected.
     }
 }
 
@@ -174,73 +330,80 @@ void PSUManager::analyze()
         psu->analyze();
     }
 
-    for (auto& psu : psus)
+    if (powerOn)
     {
-        std::map<std::string, std::string> additionalData;
-        additionalData["_PID"] = std::to_string(getpid());
-        // TODO: Fault priorities #918
-        if (!psu->isFaultLogged() && !psu->isPresent())
+        for (auto& psu : psus)
         {
-            // Create error for power supply missing.
-            additionalData["CALLOUT_INVENTORY_PATH"] = psu->getInventoryPath();
-            additionalData["CALLOUT_PRIORITY"] = "H";
-            createError("xyz.openbmc_project.Power.PowerSupply.Error.Missing",
+            std::map<std::string, std::string> additionalData;
+            additionalData["_PID"] = std::to_string(getpid());
+            // TODO: Fault priorities #918
+            if (!psu->isFaultLogged() && !psu->isPresent())
+            {
+                log<level::INFO>(
+                    fmt::format("Skip logging missing error for {}",
+                                psu->getInventoryPath())
+                        .c_str());
+                psu->setFaultLogged();
+            }
+            else if (!psu->isFaultLogged() && psu->isFaulted())
+            {
+                additionalData["STATUS_WORD"] =
+                    std::to_string(psu->getStatusWord());
+                additionalData["STATUS_MFR"] =
+                    std::to_string(psu->getMFRFault());
+                // If there are faults being reported, they possibly could be
+                // related to a bug in the firmware version running on the power
+                // supply. Capture that data into the error as well.
+                additionalData["FW_VERSION"] = psu->getFWVersion();
+
+                if ((psu->hasInputFault() || psu->hasVINUVFault()))
+                {
+                    /* The power supply location might be needed if the input
+                     * fault is due to a problem with the power supply itself.
+                     * Include the inventory path with a call out priority of
+                     * low.
+                     */
+                    additionalData["CALLOUT_INVENTORY_PATH"] =
+                        psu->getInventoryPath();
+                    additionalData["CALLOUT_PRIORITY"] = "L";
+                    createError("xyz.openbmc_project.Power.PowerSupply.Error."
+                                "InputFault",
+                                additionalData);
+                    psu->setFaultLogged();
+                }
+                else if (psu->hasMFRFault())
+                {
+                    /* This can represent a variety of faults that result in
+                     * calling out the power supply for replacement: Output
+                     * OverCurrent, Output Under Voltage, and potentially other
+                     * faults.
+                     *
+                     * Also plan on putting specific fault in AdditionalData,
+                     * along with register names and register values
+                     * (STATUS_WORD, STATUS_MFR, etc.).*/
+
+                    additionalData["CALLOUT_INVENTORY_PATH"] =
+                        psu->getInventoryPath();
+
+                    createError(
+                        "xyz.openbmc_project.Power.PowerSupply.Error.Fault",
                         additionalData);
-            psu->setFaultLogged();
-        }
-        else if (!psu->isFaultLogged() && psu->isFaulted())
-        {
-            additionalData["STATUS_WORD"] =
-                std::to_string(psu->getStatusWord());
-            // If there are faults being reported, they possibly could be
-            // related to a bug in the firmware version running on the power
-            // supply. Capture that data into the error as well.
-            additionalData["FW_VERSION"] = psu->getFWVersion();
 
-            if ((psu->hasInputFault() || psu->hasVINUVFault()))
-            {
-                /* The power supply location might be needed if the input fault
-                 * is due to a problem with the power supply itself. Include the
-                 * inventory path with a call out priority of low.
-                 */
-                additionalData["CALLOUT_INVENTORY_PATH"] =
-                    psu->getInventoryPath();
-                additionalData["CALLOUT_PRIORITY"] = "L";
-                createError(
-                    "xyz.openbmc_project.Power.PowerSupply.Error.InputFault",
-                    additionalData);
-                psu->setFaultLogged();
-            }
-            else if (psu->hasMFRFault())
-            {
-                /* This can represent a variety of faults that result in calling
-                 * out the power supply for replacement:
-                 * Output OverCurrent, Output Under Voltage, and potentially
-                 * other faults.
-                 *
-                 * Also plan on putting specific fault in AdditionalData,
-                 * along with register names and register values
-                 * (STATUS_WORD, STATUS_MFR, etc.).*/
+                    psu->setFaultLogged();
+                }
+                else if (psu->hasCommFault())
+                {
+                    /* Attempts to communicate with the power supply have
+                     * reached there limit. Create an error. */
+                    additionalData["CALLOUT_DEVICE_PATH"] =
+                        psu->getDevicePath();
 
-                additionalData["CALLOUT_INVENTORY_PATH"] =
-                    psu->getInventoryPath();
+                    createError(
+                        "xyz.openbmc_project.Power.PowerSupply.Error.CommFault",
+                        additionalData);
 
-                createError("xyz.openbmc_project.Power.PowerSupply.Error.Fault",
-                            additionalData);
-
-                psu->setFaultLogged();
-            }
-            else if (psu->hasCommFault())
-            {
-                /* Attempts to communicate with the power supply have reached
-                 * there limit. Create an error. */
-                additionalData["CALLOUT_DEVICE_PATH"] = psu->getDevicePath();
-
-                createError(
-                    "xyz.openbmc_project.Power.PowerSupply.Error.CommFault",
-                    additionalData);
-
-                psu->setFaultLogged();
+                    psu->setFaultLogged();
+                }
             }
         }
     }

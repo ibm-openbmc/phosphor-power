@@ -36,9 +36,20 @@ namespace phosphor::power::regulators
 void DBusErrorLogging::logConfigFileError(Entry::Level severity,
                                           Journal& journal)
 {
+    std::string message{
+        "xyz.openbmc_project.Power.Regulators.Error.ConfigFile"};
+    if (severity == Entry::Level::Critical)
+    {
+        // Specify a different message property for critical config file errors.
+        // These are logged when a critical operation cannot be performed due to
+        // the lack of a valid config file.  These errors may require special
+        // handling, like stopping a power on attempt.
+        message =
+            "xyz.openbmc_project.Power.Regulators.Error.ConfigFile.Critical";
+    }
+
     std::map<std::string, std::string> additionalData{};
-    logError("xyz.openbmc_project.Power.Regulators.Error.ConfigFile", severity,
-             additionalData, journal);
+    logError(message, severity, additionalData, journal);
 }
 
 void DBusErrorLogging::logDBusError(Entry::Level severity, Journal& journal)
@@ -78,11 +89,8 @@ void DBusErrorLogging::logInternalError(Entry::Level severity, Journal& journal)
 void DBusErrorLogging::logPMBusError(Entry::Level severity, Journal& journal,
                                      const std::string& inventoryPath)
 {
-    // Convert relative inventory path to an absolute path
-    std::string absInventoryPath = getAbsoluteInventoryPath(inventoryPath);
-
     std::map<std::string, std::string> additionalData{};
-    additionalData.emplace("CALLOUT_INVENTORY_PATH", absInventoryPath);
+    additionalData.emplace("CALLOUT_INVENTORY_PATH", inventoryPath);
     logError("xyz.openbmc_project.Power.Error.PMBus", severity, additionalData,
              journal);
 }
@@ -90,11 +98,8 @@ void DBusErrorLogging::logPMBusError(Entry::Level severity, Journal& journal,
 void DBusErrorLogging::logWriteVerificationError(
     Entry::Level severity, Journal& journal, const std::string& inventoryPath)
 {
-    // Convert relative inventory path to an absolute path
-    std::string absInventoryPath = getAbsoluteInventoryPath(inventoryPath);
-
     std::map<std::string, std::string> additionalData{};
-    additionalData.emplace("CALLOUT_INVENTORY_PATH", absInventoryPath);
+    additionalData.emplace("CALLOUT_INVENTORY_PATH", inventoryPath);
     logError("xyz.openbmc_project.Power.Regulators.Error.WriteVerification",
              severity, additionalData, journal);
 }

@@ -63,6 +63,47 @@ std::string getService(const std::string& path, const std::string& interface,
     return response.begin()->first;
 }
 
+DbusPropertyMap getAllProperties(sdbusplus::bus::bus& bus,
+                                 const std::string& path,
+                                 const std::string& interface,
+                                 const std::string& service)
+{
+    DbusPropertyMap properties;
+
+    auto serviceStr = service;
+    if (serviceStr.empty())
+    {
+        serviceStr = getService(path, interface, bus);
+        if (serviceStr.empty())
+        {
+            return properties;
+        }
+    }
+
+    auto method = bus.new_method_call(serviceStr.c_str(), path.c_str(),
+                                      PROPERTY_INTF, "GetAll");
+    method.append(interface);
+    auto reply = bus.call(method);
+    reply.read(properties);
+    return properties;
+}
+
+DbusSubtree getSubTree(sdbusplus::bus::bus& bus, const std::string& path,
+                       const std::string& interface, int32_t depth)
+{
+    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                          MAPPER_INTERFACE, "GetSubTree");
+    mapperCall.append(path);
+    mapperCall.append(depth);
+    mapperCall.append(std::vector<std::string>({interface}));
+
+    auto reply = bus.call(mapperCall);
+
+    DbusSubtree response;
+    reply.read(response);
+    return response;
+}
+
 json loadJSONFromFile(const char* path)
 {
     std::ifstream ifs(path);

@@ -5,6 +5,8 @@
 #include "types.hpp"
 #include "util.hpp"
 
+#include <fmt/format.h>
+
 #include <xyz/openbmc_project/Common/Device/error.hpp>
 
 #include <chrono>  // sleep_for()
@@ -17,6 +19,39 @@ namespace phosphor::power::psu
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Device::Error;
 
+PowerSupply::PowerSupply(sdbusplus::bus::bus& bus, const std::string& invpath,
+                         std::uint8_t i2cbus, std::uint16_t i2caddr) :
+    bus(bus),
+    inventoryPath(invpath)
+{
+    if (inventoryPath.empty())
+    {
+        throw std::invalid_argument{"Invalid empty inventoryPath"};
+    }
+
+    // Setup the functions to call when the D-Bus inventory path for the
+    // Present property changes.
+    presentMatch = std::make_unique<sdbusplus::bus::match_t>(
+        bus,
+        sdbusplus::bus::match::rules::propertiesChanged(inventoryPath,
+                                                        INVENTORY_IFACE),
+        [this](auto& msg) { this->inventoryChanged(msg); });
+
+    presentAddedMatch = std::make_unique<sdbusplus::bus::match_t>(
+        bus,
+        sdbusplus::bus::match::rules::interfacesAdded() +
+            sdbusplus::bus::match::rules::argNpath(0, inventoryPath),
+        [this](auto& msg) { this->inventoryAdded(msg); });
+
+    std::ostringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << i2caddr;
+    std::string addrStr = ss.str();
+    pmbusIntf = phosphor::pmbus::createPMBus(i2cbus, addrStr);
+
+    // Get the current state of the Present property.
+    updatePresence();
+}
+
 void PowerSupply::updatePresence()
 {
     try
@@ -27,7 +62,10 @@ void PowerSupply::updatePresence()
     {
         // Relying on property change or interface added to retry.
         // Log an informational trace to the journal.
-        log<level::INFO>("D-Bus property access failure exception");
+        log<level::INFO>(
+            fmt::format("D-Bus property {} access failure exception",
+                        inventoryPath)
+                .c_str());
     }
 }
 
@@ -45,14 +83,16 @@ void PowerSupply::analyze()
 
             if (statusWord)
             {
+                statusMFR = pmbusIntf->read(STATUS_MFR, Type::Debug);
                 if (statusWord & status_word::INPUT_FAULT_WARN)
                 {
                     if (!inputFault)
                     {
-                        log<level::INFO>(
-                            "INPUT fault",
-                            entry("STATUS_WORD=0x%04X",
-                                  static_cast<uint16_t>(statusWord)));
+                        log<level::INFO>(fmt::format("INPUT fault: "
+                                                     "status word = {:#04x}, "
+                                                     "MFR fault = {:#02x}",
+                                                     statusWord, statusMFR)
+                                             .c_str());
                     }
 
                     faultFound = true;
@@ -63,10 +103,11 @@ void PowerSupply::analyze()
                 {
                     if (!mfrFault)
                     {
-                        log<level::INFO>(
-                            "MFRSPECIFIC fault",
-                            entry("STATUS_WORD=0x%04X",
-                                  static_cast<uint16_t>(statusWord)));
+                        log<level::ERR>(fmt::format("MFR fault: "
+                                                    "status word = {:#04x} "
+                                                    "MFR fault =  {:#02x}",
+                                                    statusWord, statusMFR)
+                                            .c_str());
                     }
                     faultFound = true;
                     mfrFault = true;
@@ -76,10 +117,11 @@ void PowerSupply::analyze()
                 {
                     if (!vinUVFault)
                     {
-                        log<level::INFO>(
-                            "VIN_UV fault",
-                            entry("STATUS_WORD=0x%04X",
-                                  static_cast<uint16_t>(statusWord)));
+                        log<level::INFO>(fmt::format("VIN_UV fault: "
+                                                     "status word = {:#04x}, "
+                                                     "MFR fault = {:#02x}",
+                                                     statusWord, statusMFR)
+                                             .c_str());
                     }
 
                     faultFound = true;
@@ -128,6 +170,7 @@ void PowerSupply::onOffConfig(uint8_t data)
 
 void PowerSupply::clearFaults()
 {
+    faultLogged = false;
     // The PMBus device driver does not allow for writing CLEAR_FAULTS
     // directly. However, the pmbus hwmon device driver code will send a
     // CLEAR_FAULTS after reading from any of the hwmon "files" in sysfs, so
@@ -139,9 +182,9 @@ void PowerSupply::clearFaults()
         faultFound = false;
         inputFault = false;
         mfrFault = false;
+        statusMFR = 0;
         vinUVFault = false;
         readFail = 0;
-        faultLogged = false;
 
         try
         {
@@ -190,11 +233,41 @@ void PowerSupply::inventoryChanged(sdbusplus::message::message& msg)
     }
 }
 
+void PowerSupply::inventoryAdded(sdbusplus::message::message& msg)
+{
+    sdbusplus::message::object_path path;
+    msg.read(path);
+    // Make sure the signal is for the PSU inventory path
+    if (path == inventoryPath)
+    {
+        std::map<std::string, std::map<std::string, std::variant<bool>>>
+            interfaces;
+        // Get map of interfaces and their properties
+        msg.read(interfaces);
+
+        auto properties = interfaces.find(INVENTORY_IFACE);
+        if (properties != interfaces.end())
+        {
+            auto property = properties->second.find(PRESENT_PROP);
+            if (property != properties->second.end())
+            {
+                present = std::get<bool>(property->second);
+
+                log<level::INFO>(fmt::format("Power Supply {} Present {}",
+                                             inventoryPath, present)
+                                     .c_str());
+
+                updateInventory();
+            }
+        }
+    }
+}
+
 void PowerSupply::updateInventory()
 {
     using namespace phosphor::pmbus;
 
-#ifdef IBM_VPD
+#if IBM_VPD
     std::string ccin;
     std::string pn;
     std::string fn;
@@ -218,11 +291,12 @@ void PowerSupply::updateInventory()
     {
         // TODO: non-IBM inventory updates?
 
-#ifdef IBM_VPD
+#if IBM_VPD
         try
         {
             ccin = pmbusIntf->readString(CCIN, Type::HwmonDeviceDebug);
             assetProps.emplace(MODEL_PROP, ccin);
+            modelName = ccin;
         }
         catch (ReadFailure& e)
         {

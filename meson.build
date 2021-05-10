@@ -5,6 +5,7 @@ project(
         'warning_level=3',
         'werror=true',
         'cpp_std=c++17',
+        'buildtype=debugoptimized',
         'prefix=/usr'
     ],
     license: 'Apache-2.0',
@@ -126,6 +127,9 @@ if get_option('regulators')
 endif
 if get_option('sequencer-monitor')
     subdir('power-sequencer')
+endif
+if get_option('sequencer-monitor-ng')
+    subdir('phosphor-power-sequencer')
 endif
 if get_option('supply-monitor')
     subdir('power-supply')

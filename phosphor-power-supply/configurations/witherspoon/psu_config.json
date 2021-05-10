@@ -1,8 +1,4 @@
 {
-    "SystemProperties" : {
-        "MinPowerSupplies" : 1,
-        "MaxPowerSupplies" : 2
-    },
     "PowerSupplies": [
         {
             "Inventory" : "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply0",
