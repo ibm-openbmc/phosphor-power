@@ -5,7 +5,6 @@
                   "     VCS Phase ISENIN protection enabled and set",
                   "     all loops, min PWM pulse width = 40ns",
                   "     presence detect supported",
-                  "     ",
                   "v0x08 20210727",
                   "     dd1 vs dd2 auto detect",
                   "     raise VIO OV_WARN for dd1 higher voltage setting",
@@ -20,8 +19,6 @@
                   "     update IINOC setting for VCS, VIO",
                   "     change VPCIe OC_FAULT_LIMIT",
                   "     change Current Limit iterms for VCS, VDN",
-                  "",
-                  "",
                   "v0x0A 20210729",
                   "     PID changes to AVDD",
                   "v0x0B 20210804",
@@ -30,6 +27,8 @@
                   "     disable ISENIN faults",
                   "v0x0D 20210805",
                   "     add presence_detection for some devices",
+                  "v0x0E 20210811",
+                  "     Critical - AVDD IR35219 voltage settings issue fixed",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
                   
@@ -85,7 +84,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x0D", "0x00"]
+                  "values": ["0x04", "0xC0", "0x00", "0x0E", "0x00"]
                }
             },
             {
@@ -128,7 +127,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x0D", "0x00"]
+                  "register": "0x9A", "values": ["0x0E", "0x00"]
                }
             },
             {
@@ -154,7 +153,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x0D", "0x00"]
+                  "values": ["0x04", "0xDA", "0x00", "0x0E", "0x00"]
                }
             }
          ]
@@ -667,7 +666,7 @@
                         "Rule to configure a AVDD rail using the PMBus" ],
          "id": "configure_avdd_ir35219_rule_pmb",
          "actions": [
-            { "run_rule": "set_pmb_page1_rule" },
+            { "run_rule": "set_pmb_page0_rule" },
             {
                "pmbus_write_vout_command": {
                   "volts": 1.500, "format": "linear", "is_verified": true 
