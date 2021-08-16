@@ -525,7 +525,7 @@
                         "is present, the associated VRM should be too." ],
           "or": [
             { "compare_presence": { "fru": "system/chassis/motherboard/vdd_vrm1", "value": true } },
-            { "compare_presence": { "fru": "system/chassis/motherboard/cpu2",     "value": true } }
+            { "compare_presence": { "fru": "system/chassis/motherboard/dcm1/cpu0",     "value": true } }
           ]
         }
       ]
@@ -552,7 +552,7 @@
                 "if": {
                   "condition": {
                     "compare_presence": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card8",
+                        "fru": "system/chassis/motherboard/pcieslot8/pcie_card8",
                         "value": true
                     }
                   },
@@ -560,7 +560,7 @@
                     {
                       "comments": [ "Check if card has Flett CCIN keyword" ],
                       "compare_vpd": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card8",
+                        "fru": "system/chassis/motherboard/pcieslot8/pcie_card8",
                         "keyword": "CCIN",
                         "value": "6B87"
                       }
@@ -596,7 +596,7 @@
                 "if": {
                   "condition": {
                     "compare_presence": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card9",
+                        "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
                         "value": true
                     }
                   },
@@ -606,7 +606,7 @@
                       "if": {
                         "condition": {
                           "compare_vpd": {
-                            "fru": "system/chassis/motherboard/pcie_cable_card9",
+                            "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
                             "keyword": "CCIN",
                             "value": "6B87"
                           }
@@ -621,14 +621,14 @@
                               "or": [
                                 {
                                   "compare_vpd": {
-                                    "fru": "system/chassis/motherboard/pcie_cable_card9",
+                                    "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
                                     "keyword": "PartNumber",
                                     "value": "03FL194"
                                   }
                                 },
                                 {
                                   "compare_vpd": {
-                                    "fru": "system/chassis/motherboard/pcie_cable_card9",
+                                    "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
                                     "keyword": "PartNumber",
                                     "value": "03FL204"
                                   }
@@ -670,7 +670,7 @@
                 "if": {
                   "condition": {
                     "compare_presence": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card10",
+                        "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
                         "value": true
                     }
                   },
@@ -680,7 +680,7 @@
                       "if": {
                         "condition": {
                           "compare_vpd": {
-                            "fru": "system/chassis/motherboard/pcie_cable_card10",
+                            "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
                             "keyword": "CCIN",
                             "value": "6B87"
                           }
@@ -695,14 +695,14 @@
                               "or": [
                                 {
                                   "compare_vpd": {
-                                    "fru": "system/chassis/motherboard/pcie_cable_card10",
+                                    "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
                                     "keyword": "PartNumber",
                                     "value": "03FL194"
                                   }
                                 },
                                 {
                                   "compare_vpd": {
-                                    "fru": "system/chassis/motherboard/pcie_cable_card10",
+                                    "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
                                     "keyword": "PartNumber",
                                     "value": "03FL204"
                                   }
@@ -743,7 +743,7 @@
                 "if": {
                   "condition": {
                     "compare_presence": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card11",
+                        "fru": "system/chassis/motherboard/pcieslot11/pcie_card11",
                         "value": true
                     }
                   },
@@ -751,7 +751,7 @@
                     {
                       "comments": [ "Check if card has Flett CCIN keyword" ],
                       "compare_vpd": {
-                        "fru": "system/chassis/motherboard/pcie_cable_card11",
+                        "fru": "system/chassis/motherboard/pcieslot11/pcie_card11",
                         "keyword": "CCIN",
                         "value": "6B87"
                       }
@@ -1204,7 +1204,7 @@
                         "BMC I2C bus alias 28" ],
           "id": "flett_slot_c8_regulator",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card8",
+          "fru": "system/chassis/motherboard/pcieslot8/pcie_card8",
           "i2c_interface": { "bus": 28, "address": "0x76" },
           "presence_detection": { "rule_id": "is_flett_c8_present_rule" },
           "rails": [
@@ -1222,7 +1222,7 @@
                         "BMC I2C bus alias 28" ],
           "id": "flett_slot_c8_regulator_i2c",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card8",
+          "fru": "system/chassis/motherboard/pcieslot8/pcie_card8",
           "i2c_interface": { "bus": 28, "address": "0x46" },
           "presence_detection": { "rule_id": "is_flett_c8_present_rule" }
         },
@@ -1235,7 +1235,7 @@
                         "BMC I2C bus alias 27" ],
           "id": "flett_slot_c9_regulator",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card9",
+          "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
           "i2c_interface": { "bus": 27, "address": "0x76" },
           "presence_detection": { "rule_id": "is_flett_c9_present_rule" },
           "rails": [
@@ -1253,7 +1253,7 @@
                         "BMC I2C bus alias 27" ],
           "id": "flett_slot_c9_regulator_i2c",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card9",
+          "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
           "i2c_interface": { "bus": 27, "address": "0x46" },
           "presence_detection": { "rule_id": "is_flett_c9_present_rule" }
         },
@@ -1266,7 +1266,7 @@
                         "BMC I2C bus alias 30" ],
           "id": "flett_slot_c11_regulator",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card11",
+          "fru": "system/chassis/motherboard/pcieslot11/pcie_card11",
           "i2c_interface": { "bus": 30, "address": "0x76" },
           "presence_detection": { "rule_id": "is_flett_c11_present_rule" },
           "rails": [
@@ -1284,7 +1284,7 @@
                         "BMC I2C bus alias 30" ],
           "id": "flett_slot_c11_regulator_i2c",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card11",
+          "fru": "system/chassis/motherboard/pcieslot11/pcie_card11",
           "i2c_interface": { "bus": 30, "address": "0x46" },
           "presence_detection": { "rule_id": "is_flett_c11_present_rule" }
         },
@@ -1297,7 +1297,7 @@
                         "BMC I2C bus alias 29" ],
           "id": "flett_slot_c10_regulator",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card10",
+          "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
           "i2c_interface": { "bus": 29, "address": "0x76" },
           "presence_detection": { "rule_id": "is_flett_c10_present_rule" },
           "rails": [
@@ -1315,7 +1315,7 @@
                         "BMC I2C bus alias 29" ],
           "id": "flett_slot_c10_regulator_i2c",
           "is_regulator": true,
-          "fru": "system/chassis/motherboard/pcie_cable_card10",
+          "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
           "i2c_interface": { "bus": 29, "address": "0x46" },
           "presence_detection": { "rule_id": "is_flett_c10_present_rule" }
         }
