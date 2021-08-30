@@ -1019,7 +1019,7 @@
               "comments": [ "PMBus PAGE 0 rail" ],
               "id": "vio_dcm0_rail",
               "configuration": {
-                "volts": 0.97,
+                "volts": 1.02,
                 "rule_id": "configure_vio_rule"
               },
               "sensor_monitoring": { "rule_id": "read_sensors_ir35221_page0_rule" }
@@ -1106,7 +1106,7 @@
               "comments": [ "PMBus PAGE 0 rail" ],
               "id": "vio_dcm1_rail",
               "configuration": {
-                "volts": 0.97,
+                "volts": 1.02,
                 "rule_id": "configure_vio_rule"
               },
               "sensor_monitoring": { "rule_id": "read_sensors_ir35221_page0_rule" }
