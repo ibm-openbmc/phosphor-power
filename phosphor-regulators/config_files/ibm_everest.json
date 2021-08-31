@@ -29,9 +29,15 @@
                   "     add presence_detection for some devices",
                   "v0x0E 20210811",
                   "     Critical - AVDD IR35219 voltage settings issue fixed",
+                  "v0x0F 20210816",
+                  "     VIO Voltage set-point change requested",
+                  "     VIO VOUT_OV_WARN_LIMIT change with the setpoint",
+                  "v0x10 20210825",
+                  "     chassis inventory path added",
+                  "     Change some VDN & VIO phase current settings",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
-                  
+
    "rules": [
    
       {
@@ -84,7 +90,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x0E", "0x00"]
+                  "values": ["0x04", "0xC0", "0x00", "0x10", "0x00"]
                }
             },
             {
@@ -127,7 +133,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x0E", "0x00"]
+                  "register": "0x9A", "values": ["0x10", "0x00"]
                }
             },
             {
@@ -153,7 +159,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x0E", "0x00"]
+                  "values": ["0x04", "0xDA", "0x00", "0x10", "0x00"]
                }
             }
          ]
@@ -203,6 +209,7 @@
                              "i realize these are the same" ],
                "if": {
                   "condition": {
+                     "comments": [ "Check for DD1 indicator" ],
                      "compare_vpd": { "fru": "system/chassis/motherboard", 
                                       "keyword": "HW", 
                                       "byte_values": [ "0x00", "0x0A" ] }
@@ -266,6 +273,7 @@
                              "i realize these are the same" ],
                "if": {
                   "condition": {
+                     "comments": [ "Check for DD1 indicator" ],
                      "compare_vpd": { "fru": "system/chassis/motherboard", 
                                       "keyword": "HW", 
                                       "byte_values": [ "0x00", "0x0A" ] }
@@ -387,6 +395,7 @@
                "comments": [ "DD1=0.900, DD2=0.800" ],
                "if": {
                   "condition": {
+                     "comments": [ "Check for DD1 indicator" ],
                      "compare_vpd": { "fru": "system/chassis/motherboard", 
                                       "keyword": "HW", 
                                       "byte_values": [ "0x00", "0x0A" ] }
@@ -414,17 +423,24 @@
             { "run_rule": "set_avs_operation_rule" },
             { "run_rule": "configure_common_ir35219_pmb_rule" },
             {
-               "comments": [ "Phase fault High = 65A" ],
+               "comments": [ "Phase fault High = 70A" ],
                "i2c_write_bytes": {
                   "register": "0xD0",
-                  "values": ["0x04", "0x36", "0x08", "0xD0", "0x00"]
+                  "values": ["0x04", "0x36", "0x08", "0xE0", "0x00"]
                }
             },
             {
-               "comments": [ "Current Limit Iterm = 1" ],
+               "comments": [ "Phase Current Limit = 75A" ],
                "i2c_write_bytes": {
                   "register": "0xD0",
-                  "values": ["0x04", "0x32", "0x08", "0x00", "0x10"]
+                  "values": ["0x04", "0x3C", "0x08", "0x96", "0xD5"]
+               }
+            },
+            {
+               "comments": [ "Current Limit Iterm = 3" ],
+               "i2c_write_bytes": {
+                  "register": "0xD0",
+                  "values": ["0x04", "0x32", "0x08", "0x00", "0x30"]
                }
             },
             {
@@ -466,9 +482,10 @@
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
             {
-               "comments": [ "DD1=0.971, DD2=0.900" ],
+               "comments": [ "DD1=0.971, DD2=1.01" ],
                "if": {
                   "condition": {
+                     "comments": [ "Check for DD1 indicator" ],
                      "compare_vpd": { "fru": "system/chassis/motherboard", 
                                       "keyword": "HW", 
                                       "byte_values": [ "0x00", "0x0A" ] }
@@ -492,8 +509,16 @@
                   "else": [
                      {
                         "pmbus_write_vout_command": {
-                           "volts": 0.900, "format": "linear", 
+                           "volts": 1.01, "format": "linear", 
                            "is_verified": true 
+                        }
+                     },
+                     {
+                        "comments": [ "VOUT_OV_WARN_LIMIT = 1.063V",
+                                      "this prevents OV warnings on DD2.0" ],
+                        "i2c_write_bytes": {
+                           "register": "0x42",
+                           "values": ["0x20", "0x02"]
                         }
                      }
                   ]
@@ -501,10 +526,16 @@
             },
             { "run_rule": "configure_common_ir35219_pmb_rule" },
             {
-               "comments": [ "Phase Current limit = 70A" ],
+               "comments": [ "Phase fault High = 70A" ],
                "i2c_write_bytes": {
                   "register": "0xD0",
-                  "values": ["0x04", "0x3C", "0x04", "0x8C", "0xD5"]
+                  "values": ["0x04", "0x36", "0x04", "0xE0", "0x00"]
+               }
+            },{
+               "comments": [ "Phase Current limit = 75A" ],
+               "i2c_write_bytes": {
+                  "register": "0xD0",
+                  "values": ["0x04", "0x3C", "0x04", "0x96", "0xD5"]
                }
             },
             {
@@ -630,6 +661,13 @@
                }
             },
             { "run_rule": "configure_common_ir35219_pmb_rule" },
+            {
+               "comments": [ "VOUT_OV_WARN_LIMIT = 1.730V (3.46V actual)" ],
+               "i2c_write_bytes": {
+                  "register": "0x42",
+                  "values": ["0x76", "0x03"]
+               }
+            },
             {
                "comments": [ "VOUT_DROOP = 0.996*2 mOhm" ],
                "i2c_write_bytes": {
@@ -1140,6 +1178,7 @@
                         "the domain is on a VRM physically neighboring that DCM",
                         "The first device in every FRU grouping will be the GPIO expander" ],
          "number": 1,
+         "inventory_path": "system/chassis",
          "devices": [
             
             {
