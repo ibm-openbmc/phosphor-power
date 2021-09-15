@@ -50,6 +50,12 @@ void Device::clearCache()
 
 void Device::clearErrorHistory()
 {
+    // Clear error history in phase fault detection, if defined
+    if (phaseFaultDetection)
+    {
+        phaseFaultDetection->clearErrorHistory();
+    }
+
     // Clear error history in each rail
     for (std::unique_ptr<Rail>& rail : rails)
     {
@@ -94,6 +100,20 @@ void Device::configure(Services& services, System& system, Chassis& chassis)
         for (std::unique_ptr<Rail>& rail : rails)
         {
             rail->configure(services, system, chassis, *this);
+        }
+    }
+}
+
+void Device::detectPhaseFaults(Services& services, System& system,
+                               Chassis& chassis)
+{
+    // Verify device is present
+    if (isPresent(services, system, chassis))
+    {
+        // If phase fault detection is defined for this device, execute it
+        if (phaseFaultDetection)
+        {
+            phaseFaultDetection->execute(services, system, chassis, *this);
         }
     }
 }

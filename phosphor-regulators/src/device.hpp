@@ -18,6 +18,7 @@
 #include "configuration.hpp"
 #include "i2c_interface.hpp"
 #include "id_map.hpp"
+#include "phase_fault_detection.hpp"
 #include "presence_detection.hpp"
 #include "rail.hpp"
 #include "services.hpp"
@@ -60,6 +61,7 @@ class Device
      * @param presenceDetection presence detection for this device, if any
      * @param configuration configuration changes to apply to this device, if
      *                      any
+     * @param phaseFaultDetection phase fault detection for this device, if any
      * @param rails voltage rails produced by this device, if any
      */
     explicit Device(
@@ -67,15 +69,17 @@ class Device
         std::unique_ptr<i2c::I2CInterface> i2cInterface,
         std::unique_ptr<PresenceDetection> presenceDetection = nullptr,
         std::unique_ptr<Configuration> configuration = nullptr,
+        std::unique_ptr<PhaseFaultDetection> phaseFaultDetection = nullptr,
         std::vector<std::unique_ptr<Rail>> rails =
             std::vector<std::unique_ptr<Rail>>{}) :
         id{id},
         isRegulatorDevice{isRegulator}, fru{fru},
         i2cInterface{std::move(i2cInterface)}, presenceDetection{std::move(
                                                    presenceDetection)},
-        configuration{std::move(configuration)}, rails{std::move(rails)}
-    {
-    }
+        configuration{std::move(configuration)},
+        phaseFaultDetection{std::move(phaseFaultDetection)}, rails{std::move(
+                                                                 rails)}
+    {}
 
     /**
      * Adds this Device object to the specified IDMap.
@@ -129,6 +133,20 @@ class Device
     void configure(Services& services, System& system, Chassis& chassis);
 
     /**
+     * Detect redundant phase faults in this device.
+     *
+     * Does nothing if phase fault detection is not defined for this device.
+     *
+     * This method should be called every 15 seconds.
+     *
+     * @param services system services like error logging and the journal
+     * @param system system that contains the chassis
+     * @param chassis chassis that contains the device
+     */
+    void detectPhaseFaults(Services& services, System& system,
+                           Chassis& chassis);
+
+    /**
      * Returns the configuration changes to apply to this device, if any.
      *
      * @return Pointer to Configuration object.  Will equal nullptr if no
@@ -170,6 +188,17 @@ class Device
     const std::string& getID() const
     {
         return id;
+    }
+
+    /**
+     * Returns the phase fault detection for this device, if any.
+     *
+     * @return Pointer to PhaseFaultDetection object.  Will equal nullptr if no
+     *         phase fault detection is defined for this device.
+     */
+    const std::unique_ptr<PhaseFaultDetection>& getPhaseFaultDetection() const
+    {
+        return phaseFaultDetection;
     }
 
     /**
@@ -269,6 +298,12 @@ class Device
      * no configuration changes are defined for this device.
      */
     std::unique_ptr<Configuration> configuration{};
+
+    /**
+     * Phase fault detection for this device, if any.  Set to nullptr if no
+     * phase fault detection is defined for this device.
+     */
+    std::unique_ptr<PhaseFaultDetection> phaseFaultDetection{};
 
     /**
      * Voltage rails produced by this device, if any.  Vector is empty if no
