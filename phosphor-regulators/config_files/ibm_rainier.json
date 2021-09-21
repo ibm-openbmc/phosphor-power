@@ -771,6 +771,7 @@
     {
       "comments": [ "Chassis (drawer) 1" ],
       "number": 1,
+      "inventory_path": "system/chassis",
       "devices": [
         {
           "comments": [ "AVDD / IR38064: Primary PMBus Interface",
