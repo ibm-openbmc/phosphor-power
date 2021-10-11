@@ -103,26 +103,47 @@
       "actions": [
         { "run_rule": "set_page0_rule" },
         { "run_rule": "set_iout_oc_warn_limit_rule" },
+        {
+          "comments": [ "Set VOUT_MODE to exponent of -9 for VDD regulator",
+                        "to support older and newer hardware." ],
+          "i2c_write_byte": { "register": "0x20", "value": "0x17" }
+        },
         { "run_rule": "set_operation_and_voltage_rule" },
         {
-          "comments": [ "Set Vout_min to 0.4V since for VDD the voltage",
+          "comments": [ "Set VOUT_MIN to 0V since for VDD the voltage",
                         "can go down to 0.5V so we want to lower this",
                         "limit below 0.5V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x66", "0x06" ] }
+          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set Vout_max to 1.2V since for VDD the voltage",
+          "comments": [ "Set VOUT_MAX to 1.2V since for VDD the voltage",
                         "can go up to 1.1V so we want to raise this",
                         "limit above 1.1V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x24", "values": [ "0x33", "0x13" ] }
+          "i2c_write_bytes": { "register": "0x24", "values": [ "0x66", "0x02" ] }
         },
         {
-          "comments": [ "Set PGOOD_ON for VDD to a value of 0.4V." ],
-          "i2c_write_bytes": { "register": "0x5E", "values": [ "0x66", "0x06" ] }
+          "comments": [ "Set POWER_GOOD_ON for VDD to a value of 0.5V." ],
+          "i2c_write_bytes": { "register": "0x5E", "values": [ "0x00", "0x01" ] }
         },
         {
-          "comments": [ "Set PGOOD_OFF for VDD to a value of 0.35V." ],
-          "i2c_write_bytes": { "register": "0x5F", "values": [ "0x99", "0x05" ] }
+          "comments": [ "Set POWER_GOOD_OFF for VDD to a value of 0.4V." ],
+          "i2c_write_bytes": { "register": "0x5F", "values": [ "0xCD", "0x00" ] }
+        },
+        {
+          "comments": [ "Set VOUT_OV_WARN_LIMIT for VDD to a value of 1.25V." ],
+          "i2c_write_bytes": { "register": "0x42", "values": [ "0x80", "0x02" ] }
+        },
+        {
+          "comments": [ "Set VOUT_UV_WARN_LIMIT for VDD to a value of 0.45V." ],
+          "i2c_write_bytes": { "register": "0x43", "values": [ "0xE6", "0x00" ] }
+        },
+        {
+          "comments": [ "Set TOFF_FALL time for VDD to a value of 10ms." ],
+          "i2c_write_bytes": { "register": "0x65", "values": [ "0x28", "0xF0" ] }
+        },
+        {
+          "comments": [ "Set IOUT_OC_FAULT_RESPONSE for VDD to shutdown." ],
+          "i2c_write_byte": { "register": "0x47", "value": "0xC0" }
         }
       ]
     },
@@ -135,23 +156,23 @@
         { "run_rule": "set_page0_rule" },
         { "run_rule": "set_operation_and_voltage_rule" },
         {
-          "comments": [ "Set Vout_min to 0.5V since for VDN the voltage",
+          "comments": [ "Set VOUT_MIN to 0V since for VDN the voltage",
                         "can go down to 0.6V so we want to lower this",
                         "limit below 0.6V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x01" ] }
+          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set Vout_max to 1.1V since for VDN the voltage",
+          "comments": [ "Set VOUT_MAX to 1.1V since for VDN the voltage",
                         "can go up to 1.0V so we want to raise this",
                         "limit above 1.0V so the regulator does not trip." ],
           "i2c_write_bytes": { "register": "0x24", "values": [ "0x33", "0x02" ] }
         },
         {
-          "comments": [ "Set PGOOD_ON for VDN to a value of 0.45V." ],
+          "comments": [ "Set POWER_GOOD_ON for VDN to a value of 0.45V." ],
           "i2c_write_bytes": { "register": "0x5E", "values": [ "0xE6", "0x00" ] }
         },
         {
-          "comments": [ "Set PGOOD_OFF for VDN to a value of 0.40V." ],
+          "comments": [ "Set POWER_GOOD_OFF for VDN to a value of 0.40V." ],
           "i2c_write_bytes": { "register": "0x5F", "values": [ "0xCC", "0x00" ] }
         }
       ]
@@ -165,23 +186,23 @@
         { "run_rule": "set_page1_rule" },
         { "run_rule": "set_operation_and_voltage_rule" },
         {
-          "comments": [ "Set Vout_min to 0.6V since for VCS the voltage",
+          "comments": [ "Set VOUT_MIN to 0V since for VCS the voltage",
                         "can go down to 0.7V so we want to lower this",
                         "limit below 0.7V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x33", "0x01" ] }
+          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set Vout_max to 1.2V since for VCS the voltage",
+          "comments": [ "Set VOUT_MAX to 1.2V since for VCS the voltage",
                         "can go up to 1.1V so we want to raise this",
                         "limit above 1.1V so the regulator does not trip." ],
           "i2c_write_bytes": { "register": "0x24", "values": [ "0x66", "0x02" ] }
         },
         {
-          "comments": [ "Set PGOOD_ON for VCS to a value of 0.55V." ],
+          "comments": [ "Set POWER_GOOD_ON for VCS to a value of 0.55V." ],
           "i2c_write_bytes": { "register": "0x5E", "values": [ "0x19", "0x01" ] }
         },
         {
-          "comments": [ "Set PGOOD_OFF for VCS to a value of 0.50V." ],
+          "comments": [ "Set POWER_GOOD_OFF for VCS to a value of 0.50V." ],
           "i2c_write_bytes": { "register": "0x5F", "values": [ "0x00", "0x01" ] }
         }
       ]
@@ -195,23 +216,23 @@
         { "run_rule": "set_page0_rule" },
         { "run_rule": "set_operation_and_voltage_rule" },
         {
-          "comments": [ "Set Vout_min to 0.7V since for VIO the voltage",
+          "comments": [ "Set VOUT_MIN to 0V since for VIO the voltage",
                         "can go down to 0.8V so we want to lower this",
                         "limit below 0.8V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x66", "0x01" ] }
+          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set Vout_max to 1.1V since for VIO the voltage",
+          "comments": [ "Set VOUT_MAX to 1.1V since for VIO the voltage",
                         "can go up to 1.0V so we want to raise this",
                         "limit above 1.0V so the regulator does not trip." ],
           "i2c_write_bytes": { "register": "0x24", "values": [ "0x33", "0x02" ] }
         },
         {
-          "comments": [ "Set PGOOD_ON for VIO to a value of 0.55V." ],
+          "comments": [ "Set POWER_GOOD_ON for VIO to a value of 0.55V." ],
           "i2c_write_bytes": { "register": "0x5E", "values": [ "0x19", "0x01" ] }
         },
         {
-          "comments": [ "Set PGOOD_OFF for VIO to a value of 0.50V." ],
+          "comments": [ "Set POWER_GOOD_OFF for VIO to a value of 0.50V." ],
           "i2c_write_bytes": { "register": "0x5F", "values": [ "0x00", "0x01" ] }
         }
       ]
@@ -225,23 +246,23 @@
         { "run_rule": "set_page0_rule" },
         { "run_rule": "set_voltage_rule" },
         {
-          "comments": [ "Set Vout_min to 0.7V since for VPCIE the voltage",
+          "comments": [ "Set VOUT_MIN to 0V since for VPCIE the voltage",
                         "can go down to 0.81V so we want to lower this",
                         "limit below 0.81V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x66", "0x01" ] }
+          "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set Vout_max to 1.0V since for VPCIE the voltage",
+          "comments": [ "Set VOUT_MAX to 1.0V since for VPCIE the voltage",
                         "can go up to 0.91V so we want to raise this",
                         "limit above 0.91V so the regulator does not trip." ],
           "i2c_write_bytes": { "register": "0x24", "values": [ "0x00", "0x02" ] }
         },
         {
-          "comments": [ "Set PGOOD_ON for VPCIE to a value of 0.65V." ],
+          "comments": [ "Set POWER_GOOD_ON for VPCIE to a value of 0.65V." ],
           "i2c_write_bytes": { "register": "0x5E", "values": [ "0x4C", "0x01" ] }
         },
         {
-          "comments": [ "Set PGOOD_OFF for VPCIE to a value of 0.60V." ],
+          "comments": [ "Set POWER_GOOD_OFF for VPCIE to a value of 0.60V." ],
           "i2c_write_bytes": { "register": "0x5F", "values": [ "0x33", "0x01" ] }
         }
       ]
@@ -437,35 +458,54 @@
 
     {
       "comments": [ "Rule to set the AVSBus activity timeout on IR35221",
-                    "regulators.  Uses the secondary I2C interface." ],
-      "id": "set_avsbus_timeout_ir35221_rule",
+                    "regulators. Also increases the manufacturing revision.",
+                    "Uses the secondary I2C interface." ],
+      "id": "configure_ir35221_i2c_rule",
       "actions": [
         {
           "comments": [ "Set config page to 0" ],
           "i2c_write_byte": { "register": "0xFF", "value": "0x00" }
         },
-
         {
           "comments": [ "Set AVSBus activity timeout to 1us" ],
           "i2c_write_byte": { "register": "0x2F", "value": "0x06" }
+        },
+        {
+          "comments": [ "Set Manufacturing revision to 0002" ],
+          "i2c_write_bytes": { "register": "0x38", "values": [ "0x02", "0x00" ] }
         }
       ]
     },
 
 
     {
-      "comments": [ "Rule to set the AVSBus activity timeout on XDPE132G5C",
-                    "regulators.  Uses the secondary I2C interface." ],
-      "id": "set_avsbus_timeout_xdpe132g5c_rule",
+      "comments": [ "Rule to configure the VDD regulator I2C registers.",
+                    "Uses the secondary I2C interface." ],
+      "id": "configure_vdd_i2c_rule",
       "actions": [
+        {
+          "comments": [ "Set config page to 4" ],
+          "i2c_write_byte": { "register": "0xFF", "value": "0x04" }
+        },
+        {
+          "comments": [ "Set PID coefficient" ],
+          "i2c_write_bytes": { "register": "0x26", "values": [ "0x3C", "0x54" ] }
+        },
+        {
+          "comments": [ "Set differential pole2" ],
+          "i2c_write_bytes": { "register": "0x28", "values": [ "0x28", "0x56" ] }
+        },
         {
           "comments": [ "Set config page to 0" ],
           "i2c_write_byte": { "register": "0xFF", "value": "0x00" }
         },
-
         {
           "comments": [ "Set AVSBus activity timeout to 1us" ],
           "i2c_write_byte": { "register": "0x36", "value": "0x06" }
+        },
+        {
+          "comments": [ "Set Manufacturing revision to 0003" ],
+          "i2c_write_bytes": { "register": "0x74", "values": [ "0x03", "0x00" ] }
         }
       ]
     },
@@ -861,7 +901,7 @@
           "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x41" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
+            "rule_id": "configure_vdd_i2c_rule"
           }
         },
 
@@ -893,7 +933,7 @@
           "fru": "system/chassis/motherboard/vdd_vrm0",
           "i2c_interface": { "bus": 9, "address": "0x40" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
+            "rule_id": "configure_vdd_i2c_rule"
           }
         },
 
@@ -927,7 +967,7 @@
           "i2c_interface": { "bus": 10, "address": "0x41" },
           "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
+            "rule_id": "configure_vdd_i2c_rule"
           }
         },
 
@@ -961,7 +1001,7 @@
           "i2c_interface": { "bus": 10, "address": "0x40" },
           "presence_detection": { "rule_id": "is_dcm1_vrm_present_rule" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_xdpe132g5c_rule"
+            "rule_id": "configure_vdd_i2c_rule"
           }
         },
 
@@ -1003,7 +1043,7 @@
           "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x42" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_ir35221_rule"
+            "rule_id": "configure_ir35221_i2c_rule"
           }
         },
 
@@ -1045,7 +1085,7 @@
           "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 9, "address": "0x43" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_ir35221_rule"
+            "rule_id": "configure_ir35221_i2c_rule"
           }
         },
 
@@ -1089,7 +1129,7 @@
           "i2c_interface": { "bus": 10, "address": "0x42" },
           "presence_detection": { "rule_id": "is_2s_system_rule" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_ir35221_rule"
+            "rule_id": "configure_ir35221_i2c_rule"
           }
         },
 
@@ -1133,7 +1173,7 @@
           "i2c_interface": { "bus": 10, "address": "0x43" },
           "presence_detection": { "rule_id": "is_2s_system_rule" },
           "configuration": {
-            "rule_id": "set_avsbus_timeout_ir35221_rule"
+            "rule_id": "configure_ir35221_i2c_rule"
           }
         },
 
@@ -1163,7 +1203,10 @@
           "id": "vpcie_dcm0_regulator_i2c",
           "is_regulator": true,
           "fru": "system/chassis/motherboard",
-          "i2c_interface": { "bus": 9, "address": "0x44" }
+          "i2c_interface": { "bus": 9, "address": "0x44" },
+          "configuration": {
+            "rule_id": "configure_ir35221_i2c_rule"
+          }
         },
 
 
@@ -1194,7 +1237,10 @@
           "is_regulator": true,
           "fru": "system/chassis/motherboard",
           "i2c_interface": { "bus": 10, "address": "0x44" },
-          "presence_detection": { "rule_id": "is_2s_system_rule" }
+          "presence_detection": { "rule_id": "is_2s_system_rule" },
+          "configuration": {
+            "rule_id": "configure_ir35221_i2c_rule"
+          }
         },
 
 
