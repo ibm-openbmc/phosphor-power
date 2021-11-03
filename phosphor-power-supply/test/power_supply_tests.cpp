@@ -346,32 +346,6 @@ TEST_F(PowerSupplyTests, Analyze)
         EXPECT_EQ(psu2.hasPgoodFault(), false);
     }
 
-    // CML fault
-    {
-        // First STATUS_WORD wit no bits set, then with CML fault.
-        PMBusExpectations expectations;
-        setPMBusExpectations(mockPMBus, expectations);
-        psu2.analyze();
-        // STATUS_WORD with CML fault bit on.
-        expectations.statusWordValue = (status_word::CML_FAULT);
-        // Turn on STATUS_CML fault bit(s)
-        expectations.statusCMLValue = 0xFF;
-        setPMBusExpectations(mockPMBus, expectations);
-        psu2.analyze();
-        EXPECT_EQ(psu2.isPresent(), true);
-        EXPECT_EQ(psu2.isFaulted(), true);
-        EXPECT_EQ(psu2.hasInputFault(), false);
-        EXPECT_EQ(psu2.hasMFRFault(), false);
-        EXPECT_EQ(psu2.hasVINUVFault(), false);
-        EXPECT_EQ(psu2.hasCommFault(), true);
-        EXPECT_EQ(psu2.hasVoutOVFault(), false);
-        EXPECT_EQ(psu2.hasIoutOCFault(), false);
-        EXPECT_EQ(psu2.hasVoutUVFault(), false);
-        EXPECT_EQ(psu2.hasFanFault(), false);
-        EXPECT_EQ(psu2.hasTempFault(), false);
-        EXPECT_EQ(psu2.hasPgoodFault(), false);
-    }
-
     // VOUT_OV_FAULT fault
     {
         // First STATUS_WORD with no bits set, then with VOUT/VOUT_OV fault.
@@ -605,7 +579,7 @@ TEST_F(PowerSupplyTests, ClearFaults)
     EXPECT_EQ(psu.hasInputFault(), true);
     EXPECT_EQ(psu.hasMFRFault(), true);
     EXPECT_EQ(psu.hasVINUVFault(), true);
-    EXPECT_EQ(psu.hasCommFault(), true);
+    EXPECT_EQ(psu.hasCommFault(), false);
     EXPECT_EQ(psu.hasVoutOVFault(), true);
     EXPECT_EQ(psu.hasIoutOCFault(), true);
     // Cannot have VOUT_OV_FAULT and VOUT_UV_FAULT.
