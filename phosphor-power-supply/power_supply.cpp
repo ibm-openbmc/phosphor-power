@@ -223,7 +223,6 @@ void PowerSupply::analyze()
                                         statusWord, statusCML)
                                 .c_str());
                     }
-                    faultFound = true;
                     cmlFault = true;
                 }
 
