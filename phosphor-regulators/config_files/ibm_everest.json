@@ -1430,12 +1430,12 @@
                "or": [
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu0", "value": true
+                        "fru": "system/chassis/motherboard/dcm1/cpu0", "value": true
                      }
                   },
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu1", "value": true
+                        "fru": "system/chassis/motherboard/dcm1/cpu1", "value": true
                      }
                   }
                ]
@@ -1451,12 +1451,12 @@
                "or": [
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu2", "value": true
+                        "fru": "system/chassis/motherboard/dcm2/cpu0", "value": true
                      }
                   },
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu3", "value": true
+                        "fru": "system/chassis/motherboard/dcm2/cpu1", "value": true
                      }
                   }
                ]
@@ -1472,12 +1472,12 @@
                "or": [
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu4", "value": true
+                        "fru": "system/chassis/motherboard/dcm3/cpu0", "value": true
                      }
                   },
                   {
                      "compare_presence": {
-                        "fru": "system/chassis/motherboard/cpu5", "value": true
+                        "fru": "system/chassis/motherboard/dcm3/cpu1", "value": true
                      }
                   }
                ]
