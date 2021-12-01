@@ -455,7 +455,33 @@
       ]
     },
 
-
+    
+    {
+      "comments": [ "Rule to configure the IR35221 regulator on Flett.",
+                    "Also increases the manufacturing revision.",
+                    "Uses the secondary I2C interface." ],
+      "id": "configure_flett_i2c_rule",
+      "actions": [
+        {
+          "comments": [ "Set config page to 0" ],
+          "i2c_write_byte": { "register": "0xFF", "value": "0x00" }
+        },
+        {
+          "comments": [ "Set Manufacturing revision to 0002" ],
+          "i2c_write_bytes": { "register": "0x38", "values": [ "0x02", "0x00" ] }
+        },
+        {
+          "comments": [ "Unset bit 10 that provides additional hold time for",
+                        "outgoing I2C data since this feature was only needed for",
+                        "older IR controllers. Set bits 13 & 14 to 1 to enable the",
+                        "digital I2C SCL and SDA line deglitcher. Set bit 4 to a",
+                        "value of 1 to configure it as a GPIO pin instead of a WARN." ],
+          "i2c_write_bytes": { "register": "0x58", "values": [ "0x18", "0x70" ] }
+        }
+      ]
+    },
+    
+    
     {
       "comments": [ "Rule to set the AVSBus activity timeout on IR35221",
                     "regulators. Also increases the manufacturing revision.",
@@ -473,6 +499,18 @@
         {
           "comments": [ "Set Manufacturing revision to 0002" ],
           "i2c_write_bytes": { "register": "0x38", "values": [ "0x02", "0x00" ] }
+        },
+        {
+          "comments": [ "Unset bits 10 & 11 that provide additional hold time",
+
+                        "for outgoing I2C data since this feature was only needed",
+                        "for older IR controllers. Set bits 13 & 14 to enable the",
+                        "digital I2C clock and data line deglitcher. Set bit 4 to",
+                        "a value of 1 to configure it as a GPIO pin instead of a",
+                        "WARN. Set pin 15 to 0 to select the polarity of the FAULT",
+                        "pins to active high. Set pin 12 to a 0 allowing multiple",
+                        "devices on the bus." ],
+          "i2c_write_bytes": { "register": "0x58", "values": [ "0x18", "0x60" ] }
         }
       ]
     },
@@ -1271,7 +1309,10 @@
           "is_regulator": true,
           "fru": "system/chassis/motherboard/pcieslot8/pcie_card8",
           "i2c_interface": { "bus": 28, "address": "0x46" },
-          "presence_detection": { "rule_id": "is_flett_c8_present_rule" }
+          "presence_detection": { "rule_id": "is_flett_c8_present_rule" },
+          "configuration": {
+            "rule_id": "configure_flett_i2c_rule"
+          }
         },
 
 
@@ -1302,7 +1343,10 @@
           "is_regulator": true,
           "fru": "system/chassis/motherboard/pcieslot9/pcie_card9",
           "i2c_interface": { "bus": 27, "address": "0x46" },
-          "presence_detection": { "rule_id": "is_flett_c9_present_rule" }
+          "presence_detection": { "rule_id": "is_flett_c9_present_rule" },
+          "configuration": {
+            "rule_id": "configure_flett_i2c_rule"
+          }
         },
 
 
@@ -1333,7 +1377,10 @@
           "is_regulator": true,
           "fru": "system/chassis/motherboard/pcieslot11/pcie_card11",
           "i2c_interface": { "bus": 30, "address": "0x46" },
-          "presence_detection": { "rule_id": "is_flett_c11_present_rule" }
+          "presence_detection": { "rule_id": "is_flett_c11_present_rule" },
+          "configuration": {
+            "rule_id": "configure_flett_i2c_rule"
+          }
         },
 
 
@@ -1364,7 +1411,10 @@
           "is_regulator": true,
           "fru": "system/chassis/motherboard/pcieslot10/pcie_card10",
           "i2c_interface": { "bus": 29, "address": "0x46" },
-          "presence_detection": { "rule_id": "is_flett_c10_present_rule" }
+          "presence_detection": { "rule_id": "is_flett_c10_present_rule" },
+          "configuration": {
+            "rule_id": "configure_flett_i2c_rule"
+          }
         }
       ]
     }
