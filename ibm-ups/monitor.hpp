@@ -19,9 +19,14 @@
 
 #include <sdbusplus/bus.hpp>
 #include <sdeventplus/event.hpp>
+#include <sdeventplus/utility/timer.hpp>
+
+#include <chrono>
 
 namespace phosphor::power::ibm_ups
 {
+
+using Timer = sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic>;
 
 /**
  * @class Monitor
@@ -40,14 +45,67 @@ class Monitor
     ~Monitor() = default;
 
     /**
-     * Constructor
+     * Constructor.
+     *
+     * Monitoring is enabled by default, polling the UPS device for status.
+     * Call disable() to disable monitoring.
      *
      * @param bus D-Bus bus object
      * @param event event object
      */
     explicit Monitor(sdbusplus::bus::bus& bus, const sdeventplus::Event& event);
 
+    /**
+     * Disables monitoring of the UPS device.
+     *
+     * The device will not be polled to obtain the current status.
+     */
+    void disable()
+    {
+        isEnabled = false;
+        stopTimer();
+    }
+
+    /**
+     * Enables monitoring of the UPS device.
+     *
+     * The device will be polled to obtain the current status.
+     */
+    void enable()
+    {
+        isEnabled = true;
+        startTimer();
+    }
+
   private:
+    /**
+     * Start the timer that polls the UPS device for status.
+     */
+    void startTimer()
+    {
+        // Start timer with repeating 1 second interval
+        timer.restart(std::chrono::seconds(1));
+    }
+
+    /**
+     * Stop the timer that polls the UPS device for status.
+     */
+    void stopTimer()
+    {
+        // Disable timer
+        timer.setEnabled(false);
+    }
+
+    /**
+     * Timer expired callback method.
+     *
+     * Polls the UPS device for status.
+     */
+    void timerExpired()
+    {
+        ups.refresh();
+    }
+
     /**
      * D-Bus bus object.
      */
@@ -62,6 +120,19 @@ class Monitor
      * UPS device.
      */
     UPS ups;
+
+    /**
+     * Indicates whether monitoring is enabled.
+     *
+     * When monitoring is enabled, the UPS device will be polled to obtain the
+     * current status.
+     */
+    bool isEnabled{true};
+
+    /**
+     * Event timer that polls the UPS device for status.
+     */
+    Timer timer;
 };
 
 } // namespace phosphor::power::ibm_ups
