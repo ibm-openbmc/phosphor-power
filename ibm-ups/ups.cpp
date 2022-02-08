@@ -16,6 +16,9 @@
 
 #include "ups.hpp"
 
+#include "error_logging.hpp"
+#include "journal.hpp"
+
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -60,10 +63,16 @@ constexpr unsigned short maxReadErrorCount{3};
  */
 constexpr unsigned short requiredMatchingReadCount{3};
 
-UPS::UPS(sdbusplus::bus::bus& bus) : DeviceObject{bus, objectPath}
+UPS::UPS(sdbusplus::bus::bus& bus) :
+    DeviceObject{bus, objectPath, true}, bus{bus}
 {
-    // Set D-Bus properties to initial values indicating the UPS is not present
-    initializeDBusProperties();
+    // Set D-Bus properties to initial values indicating the UPS is not present.
+    // Skip emitting D-Bus signals until the object has been fully created.
+    bool skipSignals{true};
+    initializeDBusProperties(skipSignals);
+
+    // Now emit D-Bus signal that object has been created
+    emit_object_added();
 }
 
 UPS::~UPS()
@@ -110,11 +119,13 @@ void UPS::closeDevice()
     close(fd);
     fd = INVALID_FD;
 
-    // Clear data members used to open and read the device
+    // Clear other data members related to the UPS device
     devicePath.clear();
     readErrorCount = 0;
     matchingReadCount = 0;
     prevModemBits = INVALID_MODEM_BITS;
+    hasLoggedBatteryDischarging = false;
+    hasLoggedBatteryLow = false;
 
     // Set D-Bus properties to initial values indicating the UPS is not present
     initializeDBusProperties();
@@ -193,6 +204,9 @@ void UPS::handleReadDeviceSuccess(int modemBits)
             bool isBatteryLow = static_cast<bool>(modemBits & TIOCM_CTS);
             bool isUtilityFail = static_cast<bool>(modemBits & TIOCM_DSR);
 
+            // Log errors or clear error history based on UPS status
+            updateErrorStatus(isBatteryLow, isUtilityFail);
+
             // Update D-Bus properties with current UPS status
             updateDBusProperties(isOn, isBatteryLow, isUtilityFail);
         }
@@ -202,14 +216,14 @@ void UPS::handleReadDeviceSuccess(int modemBits)
     prevModemBits = modemBits;
 }
 
-void UPS::initializeDBusProperties()
+void UPS::initializeDBusProperties(bool skipSignals)
 {
-    type(device::type::Ups);
-    powerSupply(true);
-    isPresent(false);
-    state(device::state::FullyCharged);
-    isRechargeable(true);
-    batteryLevel(device::battery_level::Full);
+    type(device::type::Ups, skipSignals);
+    powerSupply(true, skipSignals);
+    isPresent(false, skipSignals);
+    state(device::state::FullyCharged, skipSignals);
+    isRechargeable(true, skipSignals);
+    batteryLevel(device::battery_level::Full, skipSignals);
 }
 
 bool UPS::openDevice()
@@ -273,6 +287,46 @@ void UPS::updateDBusProperties(bool isOn, bool isBatteryLow, bool isUtilityFail)
     // Set D-Bus BatteryLevel property
     batteryLevel(isBatteryLow ? device::battery_level::Low
                               : device::battery_level::Full);
+}
+
+void UPS::updateErrorStatus(bool isBatteryLow, bool isUtilityFail)
+{
+    // Check if utility failure is occurring, causing UPS battery to discharge
+    if (isUtilityFail)
+    {
+        // Log error if one was not already logged
+        if (!hasLoggedBatteryDischarging)
+        {
+            journal::logError(
+                "UPS battery discharging due to utility failure: " +
+                devicePath.native());
+            error_logging::logBatteryDischarging(bus, devicePath.native());
+            hasLoggedBatteryDischarging = true;
+        }
+    }
+    else
+    {
+        // Clear error history since battery is no longer discharging
+        hasLoggedBatteryDischarging = false;
+    }
+
+    // Check if the UPS battery level is low
+    if (isBatteryLow)
+    {
+        // Log error if one was not already logged
+        if (!hasLoggedBatteryLow)
+        {
+            journal::logError("UPS battery level is low: " +
+                              devicePath.native());
+            error_logging::logBatteryLow(bus, devicePath.native());
+            hasLoggedBatteryLow = true;
+        }
+    }
+    else
+    {
+        // Clear error history since battery level is no longer low
+        hasLoggedBatteryLow = false;
+    }
 }
 
 } // namespace phosphor::power::ibm_ups
