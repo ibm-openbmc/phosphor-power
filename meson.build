@@ -58,7 +58,6 @@ services = [
     ['regulators', 'phosphor-regulators-config.service'],
     ['regulators', 'phosphor-regulators-monitor-enable.service'],
     ['regulators', 'phosphor-regulators-monitor-disable.service'],
-    ['power-control', 'phosphor-power-control.service'],
 ]
 
 foreach service : services
@@ -135,7 +134,7 @@ endif
 if get_option('sequencer-monitor')
     subdir('power-sequencer')
 endif
-if get_option('power-control')
+if get_option('sequencer-monitor-ng')
     subdir('phosphor-power-sequencer')
 endif
 if get_option('supply-monitor')
