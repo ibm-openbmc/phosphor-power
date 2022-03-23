@@ -14,8 +14,8 @@
                   "     all rails, uvp_deglitch=2.56us",
                   "     all rails, min_off_time=499ns",
                   "     all ISENIN enabled and set",
-                  "     remove tda38740 b11 revisions, only set c11 & c22",
-                  "     added ir35220 devices for VDD, 1V1CS, VPCIe, VDN, VIO",
+                  "     remove controllerB b11 revisions, only set c11 & c22",
+                  "     added phase devices for VDD, 1V1CS, VPCIe, VDN, VIO",
                   "     change PID settings for 3V3IO, 3V3CS, VIO, AVDD",
                   "     set 3V3 droop settings for manufacturing mistake",
                   "     update IINOC setting for VCS, VIO",
@@ -30,7 +30,7 @@
                   "v0x000D 20210805",
                   "     add presence_detection for some devices",
                   "v0x000E 20210811",
-                  "     Critical - AVDD IR35219 voltage settings issue fixed",
+                  "     Critical - AVDD controllerA voltage settings issue fixed",
                   "v0x000F 20210816",
                   "     VIO Voltage set-point change requested",
                   "     VIO VOUT_OV_WARN_LIMIT change with the setpoint",
@@ -45,7 +45,7 @@
                   "     Change AVDD CCCL, Phase Fault High Limit",
                   "     VDN Current Limit I-term = 1",
                   "     VPCIe Pole Terms",
-                  "     Disable I2C Delay In for IR25220, IR25219, TDA38740",
+                  "     Disable I2C Delay In for IR25220, IR25219, controllerB",
                   "       (not on VCS rails because their loop2 does it)",
                   "     All VDD phases i2c addresses swapped",
                   "     VDD Load-line change to 254uOhm, PID, bandwidth",
@@ -54,6 +54,13 @@
                   "     added Tola USB regulators",
                   "     remove 1v1cs ton_delay corrections (to be manually tended)",
                   "     update 1v1cs phase fault detection",
+                  "v0x0301 20211228",
+                  "     VDD VOUT_MAX = 1.275V",
+                  "     VDD Phase OVP = 1.300V",
+                  "     remove DD1 support",
+                  "v0x0302 20220310",
+                  "     3V3IO = 3.450",
+                  "     VPCIe PID poles update",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
 
@@ -99,16 +106,16 @@
       
       
       {
-         "comments": [ "=============== COMMON IFX RULES ===============",
-                        "Rule to set common settings in all IR35219 devices",
+         "comments": [ "=============== COMMON RULES ===============",
+                        "Rule to set settings in all controller devices",
                         "(all VRMs) through PMBus" ],
-         "id": "configure_common_ir35219_pmb_rule",
+         "id": "configure_common_controllerA_pmb_rule",
          "actions": [
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x00", "0x03"]
+                  "values": ["0x04", "0xC0", "0x00", "0x02", "0x03"]
                }
             },
             {
@@ -152,8 +159,8 @@
       },
       
       {
-         "comments": [ "Rule to set IR35219 I2C deglitch and Delay"],
-         "id": "configure_ir35219_deglitch_with_offset_pmb_rule",
+         "comments": [ "Rule to set controllerA I2C deglitch and Delay"],
+         "id": "configure_controllerA_deglitch_with_offset_pmb_rule",
          "actions": [
             {
                "comments": [ "I2C comm issue, Disable I2C Delay In"],
@@ -166,8 +173,8 @@
       },
       
       {
-         "comments": [ "Rule to set IR35219 I2C deglitch and Delay"],
-         "id": "configure_ir35219_deglitch_without_offset_pmb_rule",
+         "comments": [ "Rule to set controllerA I2C deglitch and Delay"],
+         "id": "configure_controllerA_deglitch_without_offset_pmb_rule",
          "actions": [
             {
                "comments": [ "I2C comm issue, Disable I2C Delay In"],
@@ -180,8 +187,8 @@
       },
 
       {
-         "comments": [ "Rule to set common settings in all IR35220 (all VRMs)" ],
-         "id": "configure_common_ir35220_rule",
+         "comments": [ "Rule to set common settings in all phase (all VRMs)" ],
+         "id": "configure_common_phase_rule",
          "actions": [
             {
                "comments": [ "I2C comm issue, Disable I2C Delay In"],
@@ -190,7 +197,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x00", "0x03"]
+                  "register": "0x9A", "values": ["0x02", "0x03"]
                }
             },
             {
@@ -207,10 +214,10 @@
       },
       
       {
-         "comments": [ "Rule to set common settings in all TDA38740 (all VRMs)",
+         "comments": [ "Rule to set common settings in all controllerB (all VRMs)",
                         "Careful, this should only contain updates for",
                         "registers that are common between silicon revisions"],
-         "id": "configure_common_tda38740_pmb_rule",
+         "id": "configure_common_controllerB_pmb_rule",
          "actions": [
             {
                "comments": [ "I2C comm issue, Disable I2C Delay In" ],
@@ -223,7 +230,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x00", "0x03"]
+                  "values": ["0x04", "0xDA", "0x00", "0x02", "0x03"]
                }
             }
             
@@ -231,10 +238,10 @@
       },
       
       {
-         "comments": [ "Rule to determine if TDA38740 in C22 revision",
+         "comments": [ "Rule to determine if controllerB in C22 revision",
                         "This will use the secondary I2C interface",
                         "so be sure to set_device before and after"],
-         "id": "is_tda38740_c22_rule",
+         "id": "is_controllerB_c22_rule",
          "actions": [
             {
                "comments": [ "Set high register byte 00" ],
@@ -248,8 +255,8 @@
       },
       
       {
-         "comments": [ "Rule to determine if TDA38740(C21/C22) is faulted"],
-         "id": "is_tda38740_c22_faulted_rule_i2c",
+         "comments": [ "Rule to determine if controllerB(C21/C22) is faulted"],
+         "id": "is_controllerB_faulted_rule_i2c",
          "actions": [
             {
                "comments": [ "Set high register byte 00" ],
@@ -264,8 +271,8 @@
       },
       
       {
-         "comments": [ "Rule to determine if IR35220 is faulted"],
-         "id": "is_ir35220_faulted_rule",
+         "comments": [ "Rule to determine if phase is faulted"],
+         "id": "is_phase_faulted_rule",
          "actions": [
             {
                "comments": [ "Check faults_status register" ],
@@ -284,40 +291,20 @@
       {
          "comments": [ "=============== VR-VDD UNIQUE RULES ===============",
                         "Rule to configure a VDD rail using the PMBus" ],
-         "id": "configure_vdd_ir35219_rule_pmb",
+         "id": "configure_vdd_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_with_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_with_offset_pmb_rule" },
             { "run_rule": "set_pmb_page0_rule" },
             { "run_rule": "set_pmbus_operation_rule" },
             {
-               "comments": [ "DD1=0.899, DD2=0.900",
-                             "i realize these are the same" ],
-               "if": {
-                  "condition": {
-                     "run_rule": "is_system_using_dd1"
-                  },
-                  "then": [
-                     {
-                        "comments": [ "we have a system with DD1" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 0.899, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     }
-                  ],
-                  "else": [
-                     {
-                        "comments": [ "we have a system with DD2" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 0.900, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     }
-                  ]
+               "comments": [ "adjust initial voltage" ],
+               "pmbus_write_vout_command": {
+                  "volts": 0.900, "format": "linear", 
+                  "is_verified": true 
                }
             },
             { "run_rule": "set_avs_operation_rule" },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "Set Phase Current limit to 70A (0x8C)" ],
                "i2c_write_bytes": {
@@ -326,10 +313,9 @@
                }
             },
             {
-               "comments": [ "Load Line to 254uOhm" ],
+               "comments": [ "VOUT_DROOP = 254uOhm" ],
                "i2c_write_bytes": {
-                  "register": "0x28",
-                  "values": ["0x0D", "0x00"]
+                  "register": "0x28", "values": ["0x0D", "0x00"]
                }
             },
             {
@@ -369,19 +355,25 @@
                "i2c_write_bytes": {
                   "register": "0x5D", "values": ["0x50", "0xF8"]
                }
+            },
+            {
+               "comments": [ "VOUT_MAX = 1.275" ],
+               "i2c_write_bytes": {
+                  "register": "0x24", "values": ["0x8D", "0x02"]
+               }
             }
          ]
       },
       
       {
          "comments": [ "Rule to configure VDD phases" ],
-         "id": "configure_vdd_ir35220_rule",
+         "id": "configure_vdd_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
-               "comments": [ "OVP = 1200mV" ],
+               "comments": [ "OVP = 1300mV" ],
                "i2c_write_byte": { "register": "0x25", 
-                                   "value": "0x1E", "mask": "0x3F" }
+                                   "value": "0x28", "mask": "0x3F" }
             }
          ]
       },
@@ -406,53 +398,26 @@
       {
          "comments": [ "=============== VR-VCS UNIQUE RULES ===============",
                        "Rule to configure a VCS rail using the PMBus" ],
-         "id": "configure_vcs_ir35219_rule_pmb",
+         "id": "configure_vcs_controllerA_rule_pmb",
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
             { "run_rule": "set_pmbus_operation_rule" },
             {
-               "comments": [ "DD1=1.000, DD2=1.000",
-                             "i realize these are the same" ],
-               "if": {
-                  "condition": {
-                     "run_rule": "is_system_using_dd1"
-                  },
-                  "then": [
-                     {
-                        "comments": [ "we have a system with DD1" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 1.000, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     },
-                     {
-                        "comments": [ "VOUT_OV_WARN_LIMIT = 1.1V" ],
-                        "i2c_write_bytes": {
-                           "register": "0x42",
-                           "values": ["0x33", "0x02"]
-                        }
-                     }
-                  ],
-                  "else": [
-                     {
-                        "comments": [ "we have a system with DD2" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 1.000, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     },
-                     {
-                        "comments": [ "VOUT_OV_WARN_LIMIT = 1.1V" ],
-                        "i2c_write_bytes": {
-                           "register": "0x42",
-                           "values": ["0x33", "0x02"]
-                        }
-                     }
-                  ]
+               "comments": [ "adjust initial voltage" ],
+               "pmbus_write_vout_command": {
+                  "volts": 1.000, "format": "linear", 
+                  "is_verified": true 
+               }
+            },
+            {
+               "comments": [ "VOUT_OV_WARN_LIMIT = 1.1V" ],
+               "i2c_write_bytes": {
+                  "register": "0x42",
+                  "values": ["0x33", "0x02"]
                }
             },
             { "run_rule": "set_avs_operation_rule" },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "Set High Phase Fault Thresh to 75A" ],
                "i2c_write_bytes": {
@@ -500,9 +465,9 @@
       
       {
          "comments": [ "Rule to configure VCS phases" ],
-         "id": "configure_vcs_ir35220_rule",
+         "id": "configure_vcs_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OR'ing FET threshold = 4.25mV" ],
                "i2c_write_byte": { "register": "0x26", 
@@ -543,39 +508,20 @@
       {
          "comments": [ "=============== VR-VDN UNIQUE RULES ===============",
                         "Rule to configure a VDN rail using the PMBus" ],
-         "id": "configure_vdn_ir35219_rule_pmb",
+         "id": "configure_vdn_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_with_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_with_offset_pmb_rule" },
             { "run_rule": "set_pmb_page1_rule" },
             { "run_rule": "set_pmbus_operation_rule" },
             {
-               "comments": [ "DD1=0.900, DD2=0.800" ],
-               "if": {
-                  "condition": {
-                     "run_rule": "is_system_using_dd1"
-                  },
-                  "then": [
-                     {
-                        "comments": [ "we have a system with DD1" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 0.900, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     }
-                  ],
-                  "else": [
-                     {
-                        "comments": [ "we have a system with DD2" ],
-                        "pmbus_write_vout_command": {
-                           "volts": 0.800, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     }
-                  ]
+               "comments": [ "adjust initial voltage" ],
+               "pmbus_write_vout_command": {
+                  "volts": 0.800, "format": "linear", 
+                  "is_verified": true 
                }
             },
             { "run_rule": "set_avs_operation_rule" },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "Phase fault High = 75A" ],
                "i2c_write_bytes": {
@@ -616,9 +562,9 @@
       
       {
          "comments": [ "Rule to configure VDN phases" ],
-         "id": "configure_vdn_ir35220_rule",
+         "id": "configure_vdn_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1200mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -649,51 +595,23 @@
       {
          "comments": [ "=============== VR-VIO UNIQUE RULES ===============",
                         "Rule to configure a VIO rail using the PMBus" ],
-         "id": "configure_vio_ir35219_rule_pmb",
+         "id": "configure_vio_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_with_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_with_offset_pmb_rule" },
             { "run_rule": "set_pmb_page0_rule" },
             {
-               "comments": [ "DD1=0.971, DD2=1.01" ],
-               "if": {
-                  "condition": {
-                     "run_rule": "is_system_using_dd1"
-                  },
-                  "then": [
-                     {
-                        "pmbus_write_vout_command": {
-                           "volts": 0.971, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     },
-                     {
-                        "comments": [ "VOUT_OV_WARN_LIMIT = 1.050V",
-                                      "this prevents OV warnings on DD1.0" ],
-                        "i2c_write_bytes": {
-                           "register": "0x42",
-                           "values": ["0x1A", "0x02"]
-                        }
-                     }
-                  ],
-                  "else": [
-                     {
-                        "pmbus_write_vout_command": {
-                           "volts": 1.01, "format": "linear", 
-                           "is_verified": true 
-                        }
-                     },
-                     {
-                        "comments": [ "VOUT_OV_WARN_LIMIT = 1.100V",
-                                      "this prevents OV warnings on DD2.0" ],
-                        "i2c_write_bytes": {
-                           "register": "0x42",
-                           "values": ["0x33", "0x02"]
-                        }
-                     }
-                  ]
+               "pmbus_write_vout_command": {
+                  "volts": 1.01, "format": "linear", 
+                  "is_verified": true 
                }
             },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            {
+               "comments": [ "VOUT_OV_WARN_LIMIT = 1.100V" ],
+               "i2c_write_bytes": {
+                  "register": "0x42", "values": ["0x33", "0x02"]
+               }
+            },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "Phase fault High = 75A" ],
                "i2c_write_bytes": {
@@ -727,9 +645,9 @@
       
       {
          "comments": [ "Rule to configure VIO phases" ],
-         "id": "configure_vio_ir35220_rule",
+         "id": "configure_vio_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1200mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -786,18 +704,17 @@
       {
          "comments": [ "=============== VR-3V3IO UNIQUE RULES ===============",
                         "Rule to configure a 3V3IO rail using the PMBus" ],
-         "id": "configure_3v3io_ir35219_rule_pmb",
+         "id": "configure_3v3io_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_without_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_without_offset_pmb_rule" },
             { "run_rule": "set_pmb_page1_rule" },
             {
-               "comments": [ "IMPORTANT NOTE: 3V3IO reports half the actual",
-                              "this is due to an component errata issue" ],
+               "comments": [ "IMPORTANT NOTE: 3V3IO reports half the actual" ],
                "pmbus_write_vout_command": {
-                  "volts": 1.664, "format": "linear", "is_verified": true 
+                  "volts": 1.725, "format": "linear", "is_verified": true 
                }
             },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "VOUT_DROOP = 0.508*2 mOhm" ],
                "i2c_write_bytes": {
@@ -823,9 +740,9 @@
       
       {
          "comments": [ "Rule to configure 3V3IO phases" ],
-         "id": "configure_3v3io_ir35220_rule",
+         "id": "configure_3v3io_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1200mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -856,18 +773,17 @@
       {
          "comments": [ "=============== VR-3V3CS UNIQUE RULES ===============",
                         "Rule to configure a 3V3CS rail using the PMBus" ],
-         "id": "configure_3v3cs_ir35219_rule_pmb",
+         "id": "configure_3v3cs_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_without_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_without_offset_pmb_rule" },
             { "run_rule": "set_pmb_page1_rule" },
             {
-               "comments": [ "IMPORTANT NOTE: 3V3CS reports half the actual",
-                              "this is due to an component errata issue" ],
+               "comments": [ "IMPORTANT NOTE: 3V3CS reports half the actual" ],
                "pmbus_write_vout_command": {
                   "volts": 1.700, "format": "linear", "is_verified": true 
                }
             },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "VOUT_OV_WARN_LIMIT = 1.730V (3.46V actual)" ],
                "i2c_write_bytes": {
@@ -893,9 +809,9 @@
       
       {
          "comments": [ "Rule to configure 3V3CS phases" ],
-         "id": "configure_3v3cs_ir35220_rule",
+         "id": "configure_3v3cs_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1200mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -909,7 +825,7 @@
       {
          "comments": [ "=============== VR-AVDD UNIQUE RULES ===============",
                         "Rule to configure a AVDD rail using the PMBus" ],
-         "id": "configure_avdd_ir35219_rule_pmb",
+         "id": "configure_avdd_controllerA_rule_pmb",
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
             {
@@ -917,7 +833,7 @@
                   "volts": 1.500, "format": "linear", "is_verified": true 
                }
             },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "PID, P&I terms" ],
                "i2c_write_bytes": {
@@ -951,9 +867,9 @@
       
       {
          "comments": [ "Rule to configure AVDD phases" ],
-         "id": "configure_avdd_ir35220_rule",
+         "id": "configure_avdd_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1200mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -984,16 +900,16 @@
       {
          "comments": [ "=============== VR-VPCIe UNIQUE RULES ===============",
                         "Rule to configure a VPCIe rail using the PMBus" ],
-         "id": "configure_vpcie_ir35219_rule_pmb",
+         "id": "configure_vpcie_controllerA_rule_pmb",
          "actions": [
-            { "run_rule": "configure_ir35219_deglitch_with_offset_pmb_rule" },
+            { "run_rule": "configure_controllerA_deglitch_with_offset_pmb_rule" },
             { "run_rule": "set_pmb_page1_rule" },
             {
                "pmbus_write_vout_command": {
                   "volts": 0.860, "format": "linear", "is_verified": true 
                }
             },
-            { "run_rule": "configure_common_ir35219_pmb_rule" },
+            { "run_rule": "configure_common_controllerA_pmb_rule" },
             {
                "comments": [ "IOUT_OC_FAULT_LIMIT = 34A" ],
                "i2c_write_bytes": {
@@ -1018,7 +934,7 @@
                "comments": [ "PID, pole terms" ],
                "i2c_write_bytes": {
                   "register": "0xD0",
-                  "values": ["0x04", "0x24", "0x08", "0x4A", "0x6A"]
+                  "values": ["0x04", "0x24", "0x08", "0x28", "0x6A"]
                }
             }
          ]
@@ -1026,9 +942,9 @@
       
       {
          "comments": [ "Rule to configure VPCIe phases" ],
-         "id": "configure_vpcie_ir35220_rule",
+         "id": "configure_vpcie_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1100mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -1078,18 +994,18 @@
       {
          "comments": [ "=============== VR-1V1CS UNIQUE RULES ===============",
                         "Rule to configure a 1V1CS rail using the PMBus" ],
-         "id": "configure_1v1cs_tda38740_c22_rule_pmb",
+         "id": "configure_1v1cs_controllerB_c22_rule_pmb",
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
-            { "run_rule": "configure_common_tda38740_pmb_rule" }
+            { "run_rule": "configure_common_controllerB_pmb_rule" }
          ]
       },
       
       {
          "comments": [ "Rule to configure 1V1CS phases" ],
-         "id": "configure_1v1cs_ir35220_rule",
+         "id": "configure_1v1cs_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" },
+            { "run_rule": "configure_common_phase_rule" },
             {
                "comments": [ "OVP = 1320mV" ],
                "i2c_write_byte": { "register": "0x25", 
@@ -1124,18 +1040,18 @@
       {
          "comments": [ "=============== VR-5V0USB UNIQUE RULES ===============",
                         "Rule to configure a 5V0USB rail using the PMBus" ],
-         "id": "configure_5v0usb_tda38740_c22_rule_pmb",
+         "id": "configure_5v0usb_controllerB_c22_rule_pmb",
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
-            { "run_rule": "configure_common_tda38740_pmb_rule" }
+            { "run_rule": "configure_common_controllerB_pmb_rule" }
          ]
       },
       
       {
          "comments": [ "Rule to configure 5V0USB phases" ],
-         "id": "configure_5v0usb_ir35220_rule",
+         "id": "configure_5v0usb_phase_rule",
          "actions": [
-            { "run_rule": "configure_common_ir35220_rule" }
+            { "run_rule": "configure_common_phase_rule" }
          ]
       },
       
@@ -1172,8 +1088,8 @@
       },
       
       {
-         "comments": [ "Rule to collect IR35219 specific PMBus Fault Status" ],
-         "id": "capture_ir35219_pmbus_status_rule",
+         "comments": [ "Rule to collect controllerA specific PMBus Fault Status" ],
+         "id": "capture_controllerA_pmbus_status_rule",
          "actions": [
             {  "run_rule": "capture_pmbus_status_rule" },
             {  "comments": [ "STATUS_MFR_SPECIFIC" ],
@@ -1186,7 +1102,7 @@
       
       {
          "comments": [ "Rule to collect Phase Fault Status" ],
-         "id": "capture_IR35220_status_rule",
+         "id": "capture_phase_status_rule",
          "actions": [
             {  "comments": [ "Faults Status" ],
                "i2c_capture_bytes": { "register": "0x52", "count": 2 } },
@@ -1432,22 +1348,11 @@
          ]
       },
       
-      {
-         "comments": [ "Rule to determine if system planar supports dd1" ],
-         "id": "is_system_using_dd1",
-         "actions": [
-            {
-               "compare_vpd": { "fru": "system/chassis/motherboard", 
-                                "keyword": "HW", 
-                                "byte_values": [ "0x00", "0x0A" ] }
-            }
-         ]
-      },
       
       {
-         "comments": [ "Rule to read sensors on PAGE 0 of IR35219 regulators",
+         "comments": [ "Rule to read sensors on PAGE 0 of controllerA regulators",
                        "using the PMBus interface" ],
-         "id": "read_sensors_ir35219_page0_rule",
+         "id": "read_sensors_controllerA_page0_rule",
          "actions": [
             { "run_rule": "set_pmb_page0_rule" },
             { "run_rule": "read_recent_pmb_sensors_rule" },
@@ -1456,9 +1361,9 @@
       },
       
       {
-         "comments": [ "Rule to read sensors on PAGE 1 of IR35219 regulators",
+         "comments": [ "Rule to read sensors on PAGE 1 of controllerA regulators",
                        "using the PMBus interface" ],
-         "id": "read_sensors_ir35219_page1_rule",
+         "id": "read_sensors_controllerA_page1_rule",
          "actions": [
             { "run_rule": "set_pmb_page1_rule" },
             { "run_rule": "read_recent_pmb_sensors_rule" },
@@ -1467,7 +1372,7 @@
       },
       
       {
-         "comments": [ "Rule for IR35219 peak/valley PMBus Telemetry collection" ],
+         "comments": [ "Rule for controllerA peak/valley PMBus Telemetry collection" ],
          "id": "read_minmax_pmb_sensors_rule",
          "actions": [
             {
@@ -1582,7 +1487,7 @@
             },
             
             {
-               "comments": [ "P0-C59 VCS-3V3CS / IR35219:PMBus"],
+               "comments": [ "P0-C59 VCS-3V3CS / controllerA:PMBus"],
                "id": "p0c59_vcs_3v3cs_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm12",
@@ -1592,20 +1497,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_1_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                        "rule_id": "read_sensors_ir35219_page0_rule" 
+                        "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "3V3CS_rail",
                      "configuration": {
-                        "rule_id": "configure_3v3cs_ir35219_rule_pmb"
+                        "rule_id": "configure_3v3cs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                        "rule_id": "read_sensors_ir35219_page1_rule"
+                        "rule_id": "read_sensors_controllerA_page1_rule"
                      }
                   }
                ],
@@ -1626,20 +1531,20 @@
                               
                               { "set_device": "p0c59_vcs_3v3cs_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c59_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c59_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c59_3v3cs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c59_3v3cs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c59_3v3cs_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -1649,7 +1554,7 @@
             },
             
             {
-               "comments": [ "P0-C59 1V1CS phase 1 / TDA38740:I2C"],
+               "comments": [ "P0-C59 1V1CS phase 1 / controllerB:I2C"],
                "id": "p0c59_1v1cs1_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm12",
@@ -1657,7 +1562,7 @@
             },
             
             {
-               "comments": [ "P0-C59 1V1CS phase 1 / TDA38740:PMBus"],
+               "comments": [ "P0-C59 1V1CS phase 1 / controllerB:PMBus"],
                "id": "p0c59_1v1cs1_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm12",
@@ -1667,17 +1572,17 @@
                      "id": "1V1CS_0167_p1_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "comments": [ "Must use i2c for reading rev"],
                               "set_device": "p0c59_1v1cs1_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c59_1v1cs1_regulator_pmb" },
-                                    { "run_rule": "configure_1v1cs_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_1v1cs_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -1701,13 +1606,13 @@
                                  { 
                                     "and": [
                                        {"set_device": "p0c59_1v1cs1_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p0c59_1v1cs2_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  }
                               ]
@@ -1722,9 +1627,9 @@
                               { "run_rule": "capture_pmbus_status_rule" },
                               
                               { "set_device": "p0c59_1v1cs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c59_1v1cs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -1734,7 +1639,7 @@
             },
             
             {
-               "comments": [ "P0-C59 1V1CS phase 2 / TDA38740:I2C"],
+               "comments": [ "P0-C59 1V1CS phase 2 / controllerB:I2C"],
                "id": "p0c59_1v1cs2_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm12",
@@ -1742,7 +1647,7 @@
             },
             
             {
-               "comments": [ "P0-C59 1V1CS phase 2 / TDA38740:PMBus"],
+               "comments": [ "P0-C59 1V1CS phase 2 / controllerB:PMBus"],
                "id": "p0c59_1v1cs2_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm12",
@@ -1752,17 +1657,17 @@
                      "id": "1V1CS_0167_p2_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "comments": [ "Must use i2c for reading rev"],
                               "set_device": "p0c59_1v1cs2_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c59_1v1cs2_regulator_pmb" },
-                                    { "run_rule": "configure_1v1cs_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_1v1cs_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -1774,79 +1679,79 @@
             },
             
             {
-               "comments": [ "P0-C59 VCS / IR35220"],
+               "comments": [ "P0-C59 VCS / phase"],
                "id": "p0c59_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x60" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 VCS / IR35220"],
+               "comments": [ "P0-C59 VCS / phase"],
                "id": "p0c59_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x61" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 1V1CS / IR35220"],
+               "comments": [ "P0-C59 1V1CS / phase"],
                "id": "p0c59_1v1cs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x62" },
                "configuration": {
-                  "rule_id": "configure_1v1cs_ir35220_rule"
+                  "rule_id": "configure_1v1cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 1V1CS / IR35220"],
+               "comments": [ "P0-C59 1V1CS / phase"],
                "id": "p0c59_1v1cs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x63" },
                "configuration": {
-                  "rule_id": "configure_1v1cs_ir35220_rule"
+                  "rule_id": "configure_1v1cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 3V3CS / IR35220"],
+               "comments": [ "P0-C59 3V3CS / phase"],
                "id": "p0c59_3v3cs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x64" },
                "configuration": {
-                  "rule_id": "configure_3v3cs_ir35220_rule"
+                  "rule_id": "configure_3v3cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 3V3CS / IR35220"],
+               "comments": [ "P0-C59 3V3CS / phase"],
                "id": "p0c59_3v3cs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x65" },
                "configuration": {
-                  "rule_id": "configure_3v3cs_ir35220_rule"
+                  "rule_id": "configure_3v3cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C59 3V3CS / IR35220"],
+               "comments": [ "P0-C59 3V3CS / phase"],
                "id": "p0c59_3v3cs_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm12",
                "i2c_interface": { "bus": 11, "address": "0x66" },
                "configuration": {
-                  "rule_id": "configure_3v3cs_ir35220_rule"
+                  "rule_id": "configure_3v3cs_phase_rule"
                }
             },
             
@@ -1861,7 +1766,7 @@
             },
             
             {
-               "comments": [ "P0-C17 VCS-3V3IO / IR35219:PMBus"],
+               "comments": [ "P0-C17 VCS-3V3IO / controllerA:PMBus"],
                "id": "p0c17_vcs_3v3io_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm4",
@@ -1871,20 +1776,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_4_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                        "rule_id": "read_sensors_ir35219_page0_rule"
+                        "rule_id": "read_sensors_controllerA_page0_rule"
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "3V3IO_rail",
                      "configuration": {
-                        "rule_id": "configure_3v3io_ir35219_rule_pmb"
+                        "rule_id": "configure_3v3io_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                        "rule_id": "read_sensors_ir35219_page1_rule"
+                        "rule_id": "read_sensors_controllerA_page1_rule"
                      }
                   }
                ],
@@ -1905,20 +1810,20 @@
                               
                               { "set_device": "p0c17_vcs_3v3io_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c17_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c17_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c17_3v3io_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c17_3v3io_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c17_3v3io_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -1928,7 +1833,7 @@
             },
             
             {
-               "comments": [ "P0-C17 1V1CS phase 1 / TDA38740:I2C"],
+               "comments": [ "P0-C17 1V1CS phase 1 / controllerB:I2C"],
                "id": "p0c17_1v1cs1_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm4",
@@ -1936,7 +1841,7 @@
             },
             
             {
-               "comments": [ "P0-C17 1V1CS phase 1 / TDA38740:PMBus"],
+               "comments": [ "P0-C17 1V1CS phase 1 / controllerB:PMBus"],
                "id": "p0c17_1v1cs1_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm4",
@@ -1946,17 +1851,17 @@
                      "id": "1V1CS_2345_p1_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "comments": [ "Must use i2c for reading rev"],
                               "set_device": "p0c17_1v1cs1_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c17_1v1cs1_regulator_pmb" },
-                                    { "run_rule": "configure_1v1cs_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_1v1cs_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -1980,13 +1885,13 @@
                                  { 
                                     "and": [
                                        {"set_device": "p0c17_1v1cs1_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p0c17_1v1cs2_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  }
                               ]
@@ -2001,9 +1906,9 @@
                               { "run_rule": "capture_pmbus_status_rule" },
                               
                               { "set_device": "p0c17_1v1cs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c17_1v1cs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2013,7 +1918,7 @@
             },
             
             {
-               "comments": [ "P0-C17 1V1CS phase 2 / TDA38740:I2C"],
+               "comments": [ "P0-C17 1V1CS phase 2 / controllerB:I2C"],
                "id": "p0c17_1v1cs2_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm4",
@@ -2021,7 +1926,7 @@
             },
             
             {
-               "comments": [ "P0-C17 1V1CS phase 2 / TDA38740:PMBus"],
+               "comments": [ "P0-C17 1V1CS phase 2 / controllerB:PMBus"],
                "id": "p0c17_1v1cs2_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm4",
@@ -2031,17 +1936,17 @@
                      "id": "1V1CS_2345_p2_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "comments": [ "Must use i2c for reading rev"],
                               "set_device": "p0c17_1v1cs2_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c17_1v1cs2_regulator_pmb" },
-                                    { "run_rule": "configure_1v1cs_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_1v1cs_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -2053,79 +1958,79 @@
             },
             
             {
-               "comments": [ "P0-C17 VCS / IR35220"],
+               "comments": [ "P0-C17 VCS / phase"],
                "id": "p0c17_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x60" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 VCS / IR35220"],
+               "comments": [ "P0-C17 VCS / phase"],
                "id": "p0c17_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x61" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 1V1CS / IR35220"],
+               "comments": [ "P0-C17 1V1CS / phase"],
                "id": "p0c17_1v1cs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x62" },
                "configuration": {
-                  "rule_id": "configure_1v1cs_ir35220_rule"
+                  "rule_id": "configure_1v1cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 1V1CS / IR35220"],
+               "comments": [ "P0-C17 1V1CS / phase"],
                "id": "p0c17_1v1cs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x63" },
                "configuration": {
-                  "rule_id": "configure_1v1cs_ir35220_rule"
+                  "rule_id": "configure_1v1cs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 3V3IO / IR35220"],
+               "comments": [ "P0-C17 3V3IO / phase"],
                "id": "p0c17_3v3io_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x64" },
                "configuration": {
-                  "rule_id": "configure_3v3io_ir35220_rule"
+                  "rule_id": "configure_3v3io_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 3V3IO / IR35220"],
+               "comments": [ "P0-C17 3V3IO / phase"],
                "id": "p0c17_3v3io_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x65" },
                "configuration": {
-                  "rule_id": "configure_3v3io_ir35220_rule"
+                  "rule_id": "configure_3v3io_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C17 3V3IO / IR35220"],
+               "comments": [ "P0-C17 3V3IO / phase"],
                "id": "p0c17_3v3io_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm4",
                "i2c_interface": { "bus": 13, "address": "0x66" },
                "configuration": {
-                  "rule_id": "configure_3v3io_ir35220_rule"
+                  "rule_id": "configure_3v3io_phase_rule"
                }
             },
             
@@ -2140,7 +2045,7 @@
             },
             
             {
-               "comments": [ "P0-C58 VCS-VPCIeA / IR35219:PMBus"],
+               "comments": [ "P0-C58 VCS-VPCIeA / controllerA:PMBus"],
                "id": "p0c58_vcs_vpciea_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm11",
@@ -2150,20 +2055,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_6_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VPCIe_01_rail",
                      "configuration": {
-                        "rule_id": "configure_vpcie_ir35219_rule_pmb"
+                        "rule_id": "configure_vpcie_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -2184,18 +2089,18 @@
                               
                               { "set_device": "p0c58_vcs_vpciea_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c58_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_vpciea_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_vpciea_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2205,7 +2110,7 @@
             },
             
             {
-               "comments": [ "P0-C58 AVDD-VPCIeB / IR35219:PMBus"],
+               "comments": [ "P0-C58 AVDD-VPCIeB / controllerA:PMBus"],
                "id": "p0c58_avdd_vpcieb_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm11",
@@ -2215,20 +2120,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "AVDD_0167_rail",
                      "configuration": {
-                        "rule_id": "configure_avdd_ir35219_rule_pmb"
+                        "rule_id": "configure_avdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VPCIe_67_rail",
                      "configuration": {
-                        "rule_id": "configure_vpcie_ir35219_rule_pmb"
+                        "rule_id": "configure_vpcie_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -2249,18 +2154,18 @@
                               
                               { "set_device": "p0c58_avdd_vpcieb_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c58_avdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_avdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_vpcieb_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c58_vpcieb_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2270,90 +2175,90 @@
             },
             
             {
-               "comments": [ "P0-C58 VCS / IR35220"],
+               "comments": [ "P0-C58 VCS / phase"],
                "id": "p0c58_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x60" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 VCS / IR35220"],
+               "comments": [ "P0-C58 VCS / phase"],
                "id": "p0c58_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x61" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 VPCIeA / IR35220"],
+               "comments": [ "P0-C58 VPCIeA / phase"],
                "id": "p0c58_vpciea_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x62" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 VPCIeA / IR35220"],
+               "comments": [ "P0-C58 VPCIeA / phase"],
                "id": "p0c58_vpciea_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x63" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 VPCIeB / IR35220"],
+               "comments": [ "P0-C58 VPCIeB / phase"],
                "id": "p0c58_vpcieb_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x64" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 VPCIeB / IR35220"],
+               "comments": [ "P0-C58 VPCIeB / phase"],
                "id": "p0c58_vpcieb_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x65" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 AVDD / IR35220"],
+               "comments": [ "P0-C58 AVDD / phase"],
                "id": "p0c58_avdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x66" },
                "configuration": {
-                  "rule_id": "configure_avdd_ir35220_rule"
+                  "rule_id": "configure_avdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C58 AVDD / IR35220"],
+               "comments": [ "P0-C58 AVDD / phase"],
                "id": "p0c58_avdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm11",
                "i2c_interface": { "bus": 9, "address": "0x67" },
                "configuration": {
-                  "rule_id": "configure_avdd_ir35220_rule"
+                  "rule_id": "configure_avdd_phase_rule"
                }
             },
             
@@ -2368,7 +2273,7 @@
             },
             
             {
-               "comments": [ "P0-C16 VCS-VPCIeA / IR35219:PMBus"],
+               "comments": [ "P0-C16 VCS-VPCIeA / controllerA:PMBus"],
                "id": "p0c16_vcs_vpciea_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm3",
@@ -2378,20 +2283,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_3_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VPCIe_45_rail",
                      "configuration": {
-                        "rule_id": "configure_vpcie_ir35219_rule_pmb"
+                        "rule_id": "configure_vpcie_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -2412,18 +2317,18 @@
                               
                               { "set_device": "p0c16_vcs_vpciea_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c16_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_vpciea_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_vpciea_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2433,7 +2338,7 @@
             },
             
             {
-               "comments": [ "P0-C16 AVDD-VPCIeB / IR35219:PMBus"],
+               "comments": [ "P0-C16 AVDD-VPCIeB / controllerA:PMBus"],
                "id": "p0c16_avdd_vpcieb_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm3",
@@ -2443,20 +2348,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "AVDD_2345_rail",
                      "configuration": {
-                        "rule_id": "configure_avdd_ir35219_rule_pmb"
+                        "rule_id": "configure_avdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VPCIe_23_rail",
                      "configuration": {
-                        "rule_id": "configure_vpcie_ir35219_rule_pmb"
+                        "rule_id": "configure_vpcie_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -2477,18 +2382,18 @@
                               
                               { "set_device": "p0c16_avdd_vpcieb_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c16_avdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_avdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_vpcieb_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c16_vpcieb_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2498,90 +2403,90 @@
             },
             
             {
-               "comments": [ "P0-C16 VCS / IR35220"],
+               "comments": [ "P0-C16 VCS / phase"],
                "id": "p0c16_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x60" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 VCS / IR35220"],
+               "comments": [ "P0-C16 VCS / phase"],
                "id": "p0c16_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x61" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 VPCIeA / IR35220"],
+               "comments": [ "P0-C16 VPCIeA / phase"],
                "id": "p0c16_vpciea_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x62" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 VPCIeA / IR35220"],
+               "comments": [ "P0-C16 VPCIeA / phase"],
                "id": "p0c16_vpciea_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x63" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 VPCIeB / IR35220"],
+               "comments": [ "P0-C16 VPCIeB / phase"],
                "id": "p0c16_vpcieb_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x64" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 VPCIeB / IR35220"],
+               "comments": [ "P0-C16 VPCIeB / phase"],
                "id": "p0c16_vpcieb_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x65" },
                "configuration": {
-                  "rule_id": "configure_vpcie_ir35220_rule"
+                  "rule_id": "configure_vpcie_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 AVDD / IR35220"],
+               "comments": [ "P0-C16 AVDD / phase"],
                "id": "p0c16_avdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x66" },
                "configuration": {
-                  "rule_id": "configure_avdd_ir35220_rule"
+                  "rule_id": "configure_avdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C16 AVDD / IR35220"],
+               "comments": [ "P0-C16 AVDD / phase"],
                "id": "p0c16_avdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm3",
                "i2c_interface": { "bus": 10, "address": "0x67" },
                "configuration": {
-                  "rule_id": "configure_avdd_ir35220_rule"
+                  "rule_id": "configure_avdd_phase_rule"
                }
             },
             
@@ -2596,7 +2501,7 @@
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C62 VDD / controllerA:PMBus"],
                "id": "p0c62_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm14",
@@ -2606,10 +2511,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_0_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -2625,23 +2530,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c62_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c62_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c62_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2651,90 +2556,90 @@
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x38" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x39" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3A" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3B" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3C" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3D" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3E" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C62 VDD / IR35220"],
+               "comments": [ "P0-C62 VDD / phase"],
                "id": "p0c62_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm14",
                "i2c_interface": { "bus": 11, "address": "0x3F" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -2749,7 +2654,7 @@
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C60 VDD / controllerA:PMBus"],
                "id": "p0c60_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm13",
@@ -2759,10 +2664,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_1_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -2778,23 +2683,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c60_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c60_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c60_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2804,90 +2709,90 @@
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x30" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x31" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x32" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x33" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x34" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x35" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x36" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C60 VDD / IR35220"],
+               "comments": [ "P0-C60 VDD / phase"],
                "id": "p0c60_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm13",
                "i2c_interface": { "bus": 11, "address": "0x37" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -2903,7 +2808,7 @@
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C13 VDD / controllerA:PMBus"],
                "id": "p0c13_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm1",
@@ -2914,10 +2819,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_2_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -2933,23 +2838,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c13_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c13_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c13_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -2959,98 +2864,98 @@
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x38" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x39" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3A" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3B" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3C" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3D" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3E" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C13 VDD / IR35220"],
+               "comments": [ "P0-C13 VDD / phase"],
                "id": "p0c13_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm1",
                "i2c_interface": { "bus": 10, "address": "0x3F" },
                "presence_detection": { "rule_id": "is_p0c13_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -3066,7 +2971,7 @@
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C15 VDD / controllerA:PMBus"],
                "id": "p0c15_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm2",
@@ -3077,10 +2982,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_3_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3096,23 +3001,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c15_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c15_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c15_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3122,98 +3027,98 @@
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x30" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x31" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x32" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x33" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x34" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x35" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x36" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C15 VDD / IR35220"],
+               "comments": [ "P0-C15 VDD / phase"],
                "id": "p0c15_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm2",
                "i2c_interface": { "bus": 10, "address": "0x37" },
                "presence_detection": { "rule_id": "is_p0c15_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -3229,7 +3134,7 @@
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C18 VDD / controllerA:PMBus"],
                "id": "p0c18_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm5",
@@ -3240,10 +3145,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_4_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3259,23 +3164,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c18_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c18_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c18_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3285,98 +3190,98 @@
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x38" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x39" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3A" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3B" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3C" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3D" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3E" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C18 VDD / IR35220"],
+               "comments": [ "P0-C18 VDD / phase"],
                "id": "p0c18_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm5",
                "i2c_interface": { "bus": 13, "address": "0x3F" },
                "presence_detection": { "rule_id": "is_p0c18_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -3392,7 +3297,7 @@
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C20 VDD / controllerA:PMBus"],
                "id": "p0c20_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm6",
@@ -3403,10 +3308,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_5_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3422,23 +3327,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c20_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c20_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c20_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3448,98 +3353,98 @@
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x30" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x31" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x32" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x33" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x34" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x35" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x36" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C20 VDD / IR35220"],
+               "comments": [ "P0-C20 VDD / phase"],
                "id": "p0c20_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm6",
                "i2c_interface": { "bus": 13, "address": "0x37" },
                "presence_detection": { "rule_id": "is_p0c20_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
 
@@ -3555,7 +3460,7 @@
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C57 VDD / controllerA:PMBus"],
                "id": "p0c57_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm10",
@@ -3566,10 +3471,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_6_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3585,23 +3490,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c57_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c57_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c57_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3611,98 +3516,98 @@
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x38" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x39" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3A" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3B" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3C" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3D" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3E" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C57 VDD / IR35220"],
+               "comments": [ "P0-C57 VDD / phase"],
                "id": "p0c57_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm10",
                "i2c_interface": { "bus": 9, "address": "0x3F" },
                "presence_detection": { "rule_id": "is_p0c57_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
 
@@ -3718,7 +3623,7 @@
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35219:PMBus"],
+               "comments": [ "P0-C55 VDD / controllerA:PMBus"],
                "id": "p0c55_vdd_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm9",
@@ -3729,10 +3634,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VDD_7_rail",
                      "configuration": {
-                        "rule_id": "configure_vdd_ir35219_rule_pmb"
+                        "rule_id": "configure_vdd_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3748,23 +3653,23 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c55_vdd_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c55_vdd_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase4" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase5" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase6" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase7" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c55_vdd_phase8" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3774,98 +3679,98 @@
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x30" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x31" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x32" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase4",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x33" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase5",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x34" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase6",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x35" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase7",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x36" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C55 VDD / IR35220"],
+               "comments": [ "P0-C55 VDD / phase"],
                "id": "p0c55_vdd_phase8",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm9",
                "i2c_interface": { "bus": 9, "address": "0x37" },
                "presence_detection": { "rule_id": "is_p0c55_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdd_ir35220_rule"
+                  "rule_id": "configure_vdd_phase_rule"
                }
             },
             
@@ -3880,7 +3785,7 @@
             },
             
             {
-               "comments": [ "P0-C63 VCS-VDN / IR35219:PMBus"],
+               "comments": [ "P0-C63 VCS-VDN / controllerA:PMBus"],
                "id": "p0c63_vcs_vdn_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm15",
@@ -3890,20 +3795,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_0_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VDN_01_rail",
                      "configuration": {
-                        "rule_id": "configure_vdn_ir35219_rule_pmb"
+                        "rule_id": "configure_vdn_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -3924,20 +3829,20 @@
                               
                               { "set_device": "p0c63_vcs_vdn_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c63_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vdn_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vdn_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vdn_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3947,7 +3852,7 @@
             },
             
             {
-               "comments": [ "P0-C63 VIO / IR35219:PMBus"],
+               "comments": [ "P0-C63 VIO / controllerA:PMBus"],
                "id": "p0c63_vio_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm15",
@@ -3957,10 +3862,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VIO_01_rail",
                      "configuration": {
-                        "rule_id": "configure_vio_ir35219_rule_pmb"
+                        "rule_id": "configure_vio_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -3976,13 +3881,13 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c63_vio_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c63_vio_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vio_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c63_vio_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -3992,90 +3897,90 @@
             },
             
             {
-               "comments": [ "P0-C63 VCS / IR35220"],
+               "comments": [ "P0-C63 VCS / phase"],
                "id": "p0c63_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x70" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VCS / IR35220"],
+               "comments": [ "P0-C63 VCS / phase"],
                "id": "p0c63_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x71" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VDN / IR35220"],
+               "comments": [ "P0-C63 VDN / phase"],
                "id": "p0c63_vdn_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x72" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VDN / IR35220"],
+               "comments": [ "P0-C63 VDN / phase"],
                "id": "p0c63_vdn_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x73" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VDN / IR35220"],
+               "comments": [ "P0-C63 VDN / phase"],
                "id": "p0c63_vdn_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x74" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VIO / IR35220"],
+               "comments": [ "P0-C63 VIO / phase"],
                "id": "p0c63_vio_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x75" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VIO / IR35220"],
+               "comments": [ "P0-C63 VIO / phase"],
                "id": "p0c63_vio_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x76" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C63 VIO / IR35220"],
+               "comments": [ "P0-C63 VIO / phase"],
                "id": "p0c63_vio_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm15",
                "i2c_interface": { "bus": 11, "address": "0x77" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
 
@@ -4091,7 +3996,7 @@
             },
             
             {
-               "comments": [ "P0-C12 VCS-VDN / IR35219:PMBus"],
+               "comments": [ "P0-C12 VCS-VDN / controllerA:PMBus"],
                "id": "p0c12_vcs_vdn_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm0",
@@ -4102,20 +4007,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_2_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VDN_23_rail",
                      "configuration": {
-                        "rule_id": "configure_vdn_ir35219_rule_pmb"
+                        "rule_id": "configure_vdn_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -4136,20 +4041,20 @@
                               
                               { "set_device": "p0c12_vcs_vdn_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c12_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vdn_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vdn_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vdn_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4159,7 +4064,7 @@
             },
 
             {
-               "comments": [ "P0-C12 VIO / IR35219:PMBus"],
+               "comments": [ "P0-C12 VIO / controllerA:PMBus"],
                "id": "p0c12_vio_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm0",
@@ -4170,10 +4075,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VIO_23_rail",
                      "configuration": {
-                        "rule_id": "configure_vio_ir35219_rule_pmb"
+                        "rule_id": "configure_vio_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -4189,13 +4094,13 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c12_vio_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c12_vio_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vio_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c12_vio_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4205,98 +4110,98 @@
             },
             
             {
-               "comments": [ "P0-C12 VCS / IR35220"],
+               "comments": [ "P0-C12 VCS / phase"],
                "id": "p0c12_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x70" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VCS / IR35220"],
+               "comments": [ "P0-C12 VCS / phase"],
                "id": "p0c12_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x71" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VDN / IR35220"],
+               "comments": [ "P0-C12 VDN / phase"],
                "id": "p0c12_vdn_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x72" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VDN / IR35220"],
+               "comments": [ "P0-C12 VDN / phase"],
                "id": "p0c12_vdn_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x73" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VDN / IR35220"],
+               "comments": [ "P0-C12 VDN / phase"],
                "id": "p0c12_vdn_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x74" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VIO / IR35220"],
+               "comments": [ "P0-C12 VIO / phase"],
                "id": "p0c12_vio_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x75" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VIO / IR35220"],
+               "comments": [ "P0-C12 VIO / phase"],
                "id": "p0c12_vio_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x76" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C12 VIO / IR35220"],
+               "comments": [ "P0-C12 VIO / phase"],
                "id": "p0c12_vio_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm0",
                "i2c_interface": { "bus": 10, "address": "0x77" },
                "presence_detection": { "rule_id": "is_p0c12_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
 
@@ -4312,7 +4217,7 @@
             },
             
             {
-               "comments": [ "P0-C21 VCS-VDN / IR35219:PMBus"],
+               "comments": [ "P0-C21 VCS-VDN / controllerA:PMBus"],
                "id": "p0c21_vcs_vdn_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm7",
@@ -4323,20 +4228,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_5_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VDN_45_rail",
                      "configuration": {
-                        "rule_id": "configure_vdn_ir35219_rule_pmb"
+                        "rule_id": "configure_vdn_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -4357,20 +4262,20 @@
                               
                               { "set_device": "p0c21_vcs_vdn_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c21_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vdn_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vdn_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vdn_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4380,7 +4285,7 @@
             },
 
             {
-               "comments": [ "P0-C21 VIO / IR35219:PMBus"],
+               "comments": [ "P0-C21 VIO / controllerA:PMBus"],
                "id": "p0c21_vio_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm7",
@@ -4391,10 +4296,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VIO_45_rail",
                      "configuration": {
-                        "rule_id": "configure_vio_ir35219_rule_pmb"
+                        "rule_id": "configure_vio_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -4410,13 +4315,13 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c21_vio_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c21_vio_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vio_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c21_vio_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4426,98 +4331,98 @@
             },
             
             {
-               "comments": [ "P0-C21 VCS / IR35220"],
+               "comments": [ "P0-C21 VCS / phase"],
                "id": "p0c21_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x70" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VCS / IR35220"],
+               "comments": [ "P0-C21 VCS / phase"],
                "id": "p0c21_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x71" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VDN / IR35220"],
+               "comments": [ "P0-C21 VDN / phase"],
                "id": "p0c21_vdn_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x72" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VDN / IR35220"],
+               "comments": [ "P0-C21 VDN / phase"],
                "id": "p0c21_vdn_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x73" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VDN / IR35220"],
+               "comments": [ "P0-C21 VDN / phase"],
                "id": "p0c21_vdn_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x74" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VIO / IR35220"],
+               "comments": [ "P0-C21 VIO / phase"],
                "id": "p0c21_vio_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x75" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VIO / IR35220"],
+               "comments": [ "P0-C21 VIO / phase"],
                "id": "p0c21_vio_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x76" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C21 VIO / IR35220"],
+               "comments": [ "P0-C21 VIO / phase"],
                "id": "p0c21_vio_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm7",
                "i2c_interface": { "bus": 13, "address": "0x77" },
                "presence_detection": { "rule_id": "is_p0c21_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
@@ -4533,7 +4438,7 @@
             },
             
             {
-               "comments": [ "P0-C54 VCS_VDN / IR35219:PMBus"],
+               "comments": [ "P0-C54 VCS_VDN / controllerA:PMBus"],
                "id": "p0c54_vcs_vdn_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm8",
@@ -4544,20 +4449,20 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VCS_7_rail",
                      "configuration": {
-                        "rule_id": "configure_vcs_ir35219_rule_pmb"
+                        "rule_id": "configure_vcs_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   },
                   {
                      "comments": [ "PMBus PAGE 1 rail" ],
                      "id": "VDN_67_rail",
                      "configuration": {
-                        "rule_id": "configure_vdn_ir35219_rule_pmb"
+                        "rule_id": "configure_vdn_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page1_rule" 
+                       "rule_id": "read_sensors_controllerA_page1_rule" 
                      }
                   }
                ],
@@ -4578,20 +4483,20 @@
                               
                               { "set_device": "p0c54_vcs_vdn_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "run_rule": "set_pmb_page1_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               
                               { "set_device": "p0c54_vcs_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vcs_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vdn_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vdn_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vdn_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4601,7 +4506,7 @@
             },
             
             {
-               "comments": [ "P0-C54 VIO / IR35219:PMBus"],
+               "comments": [ "P0-C54 VIO / controllerA:PMBus"],
                "id": "p0c54_vio_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/vrm8",
@@ -4612,10 +4517,10 @@
                      "comments": [ "PMBus PAGE 0 rail" ],
                      "id": "VIO_67_rail",
                      "configuration": {
-                        "rule_id": "configure_vio_ir35219_rule_pmb"
+                        "rule_id": "configure_vio_controllerA_rule_pmb"
                      },
                      "sensor_monitoring": { 
-                       "rule_id": "read_sensors_ir35219_page0_rule" 
+                       "rule_id": "read_sensors_controllerA_page0_rule" 
                      }
                   }
                ],
@@ -4631,13 +4536,13 @@
                               { "run_rule": "capture_16b_gpio_fault_status_rule" },
                               { "set_device": "p0c54_vio_regulator_pmb" },
                               { "run_rule": "set_pmb_page0_rule" },
-                              { "run_rule": "capture_ir35219_pmbus_status_rule" },
+                              { "run_rule": "capture_controllerA_pmbus_status_rule" },
                               { "set_device": "p0c54_vio_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vio_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c54_vio_phase3" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4647,98 +4552,98 @@
             },
             
             {
-               "comments": [ "P0-C54 VCS / IR35220"],
+               "comments": [ "P0-C54 VCS / phase"],
                "id": "p0c54_vcs_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x70" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VCS / IR35220"],
+               "comments": [ "P0-C54 VCS / phase"],
                "id": "p0c54_vcs_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x71" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vcs_ir35220_rule"
+                  "rule_id": "configure_vcs_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VDN / IR35220"],
+               "comments": [ "P0-C54 VDN / phase"],
                "id": "p0c54_vdn_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x72" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VDN / IR35220"],
+               "comments": [ "P0-C54 VDN / phase"],
                "id": "p0c54_vdn_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x73" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VDN / IR35220"],
+               "comments": [ "P0-C54 VDN / phase"],
                "id": "p0c54_vdn_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x74" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vdn_ir35220_rule"
+                  "rule_id": "configure_vdn_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VIO / IR35220"],
+               "comments": [ "P0-C54 VIO / phase"],
                "id": "p0c54_vio_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x75" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VIO / IR35220"],
+               "comments": [ "P0-C54 VIO / phase"],
                "id": "p0c54_vio_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x76" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C54 VIO / IR35220"],
+               "comments": [ "P0-C54 VIO / phase"],
                "id": "p0c54_vio_phase3",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/vrm8",
                "i2c_interface": { "bus": 9, "address": "0x77" },
                "presence_detection": { "rule_id": "is_p0c54_present_rule" },
                "configuration": {
-                  "rule_id": "configure_vio_ir35220_rule"
+                  "rule_id": "configure_vio_phase_rule"
                }
             },
             
@@ -4748,7 +4653,7 @@
             
             {
                "comments": [ "P1 ============== Base Camp ==============",
-                              "P1 5v0usb phase 1 / TDA38740:I2C"],
+                              "P1 5v0usb phase 1 / controllerB:I2C"],
                "id": "p1_5v0usb1_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/dasd_backplane",
@@ -4756,7 +4661,7 @@
             },
             
             {
-               "comments": [ "P1 5v0usb1 phase 1 / TDA38740:PMBus"],
+               "comments": [ "P1 5v0usb1 phase 1 / controllerB:PMBus"],
                "id": "p1_5v0usb1_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/dasd_backplane",
@@ -4766,17 +4671,17 @@
                      "id": "Front_USB_p1_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "set_device": "p1_5v0usb1_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
                                     "comments": [ "only run updates on latest c22"],
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p1_5v0usb1_regulator_pmb" },
-                                    { "run_rule": "configure_5v0usb_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_5v0usb_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -4794,25 +4699,25 @@
                                  { 
                                     "and": [
                                        {"set_device": "p1_5v0usb1_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p1_5v0usb2_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p1_5v0usb_phase1"},
-                                       {"run_rule": "is_ir35220_faulted_rule"}
+                                       {"run_rule": "is_phase_faulted_rule"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p1_5v0usb_phase2"},
-                                       {"run_rule": "is_ir35220_faulted_rule"}
+                                       {"run_rule": "is_phase_faulted_rule"}
                                     ]
                                  }
                               ]
@@ -4823,9 +4728,9 @@
                               { "set_device": "p1_5v0usb2_regulator_pmb" },
                               { "run_rule": "capture_pmbus_status_rule" },
                               { "set_device": "p1_5v0usb_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p1_5v0usb_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4835,7 +4740,7 @@
             },
             
             {
-               "comments": [ "P1 5v0usb phase 2 / TDA38740:I2C"],
+               "comments": [ "P1 5v0usb phase 2 / controllerB:I2C"],
                "id": "p1_5v0usb2_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/dasd_backplane",
@@ -4843,7 +4748,7 @@
             },
             
             {
-               "comments": [ "P1 5v0usb phase 2 / TDA38740:PMBus"],
+               "comments": [ "P1 5v0usb phase 2 / controllerB:PMBus"],
                "id": "p1_5v0usb2_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/dasd_backplane",
@@ -4853,17 +4758,17 @@
                      "id": "Front_USB_p2_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "set_device": "p1_5v0usb2_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
                                     "comments": [ "only run updates on latest c22"],
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p1_5v0usb2_regulator_pmb" },
-                                    { "run_rule": "configure_5v0usb_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_5v0usb_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            } 
@@ -4875,24 +4780,24 @@
             },
             
             {
-               "comments": [ "P1 5v0usb Phase 1 / IR35220"],
+               "comments": [ "P1 5v0usb Phase 1 / phase"],
                "id": "p1_5v0usb_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/dasd_backplane",
                "i2c_interface": { "bus": 45, "address": "0x14" },
                "configuration": {
-                  "rule_id": "configure_5v0usb_ir35220_rule"
+                  "rule_id": "configure_5v0usb_phase_rule"
                }
             },
             
             {
-               "comments": [ "P1 5v0usb Phase 2 / IR35220"],
+               "comments": [ "P1 5v0usb Phase 2 / phase"],
                "id": "p1_5v0usb_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/dasd_backplane",
                "i2c_interface": { "bus": 46, "address": "0x14" },
                "configuration": {
-                  "rule_id": "configure_5v0usb_ir35220_rule"
+                  "rule_id": "configure_5v0usb_phase_rule"
                }
             },
             
@@ -4902,7 +4807,7 @@
             
             {
                "comments": [ "P0-C0 ============== Tola ==============" ,
-                                 "5v0usb phase 1 / TDA38740:I2C"],
+                                 "5v0usb phase 1 / controllerB:I2C"],
                "id": "p0c0_5v0usb1_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/bmc",
@@ -4910,7 +4815,7 @@
             },
             
             {
-               "comments": [ "P0-C0 5v0usb1 phase 1 / TDA38740:PMBus"],
+               "comments": [ "P0-C0 5v0usb1 phase 1 / controllerB:PMBus"],
                "id": "p0c0_5v0usb1_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/bmc",
@@ -4920,17 +4825,17 @@
                      "id": "Rear_USB_p1_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "set_device": "p0c0_5v0usb1_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
                                     "comments": [ "only run updates on latest c22"],
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c0_5v0usb1_regulator_pmb" },
-                                    { "run_rule": "configure_5v0usb_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_5v0usb_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            }
@@ -4948,25 +4853,25 @@
                                  { 
                                     "and": [
                                        {"set_device": "p0c0_5v0usb1_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p0c0_5v0usb2_regulator_i2c"},
-                                       {"run_rule": "is_tda38740_c22_faulted_rule_i2c"}
+                                       {"run_rule": "is_controllerB_faulted_rule_i2c"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p0c0_5v0usb_phase1"},
-                                       {"run_rule": "is_ir35220_faulted_rule"}
+                                       {"run_rule": "is_phase_faulted_rule"}
                                     ]
                                  },
                                  { 
                                     "and": [
                                        {"set_device": "p0c0_5v0usb_phase2"},
-                                       {"run_rule": "is_ir35220_faulted_rule"}
+                                       {"run_rule": "is_phase_faulted_rule"}
                                     ]
                                  }
                               ]
@@ -4977,9 +4882,9 @@
                               { "set_device": "p0c0_5v0usb2_regulator_pmb" },
                               { "run_rule": "capture_pmbus_status_rule" },
                               { "set_device": "p0c0_5v0usb_phase1" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "set_device": "p0c0_5v0usb_phase2" },
-                              { "run_rule": "capture_IR35220_status_rule" },
+                              { "run_rule": "capture_phase_status_rule" },
                               { "log_phase_fault": { "type": "n" } }
                            ]
                         }
@@ -4989,7 +4894,7 @@
             },
             
             {
-               "comments": [ "P0-C0 5v0usb phase 2 / TDA38740:I2C"],
+               "comments": [ "P0-C0 5v0usb phase 2 / controllerB:I2C"],
                "id": "p0c0_5v0usb2_regulator_i2c",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/bmc",
@@ -4997,7 +4902,7 @@
             },
             
             {
-               "comments": [ "P0-C0 5v0usb phase 2 / TDA38740:PMBus"],
+               "comments": [ "P0-C0 5v0usb phase 2 / controllerB:PMBus"],
                "id": "p0c0_5v0usb2_regulator_pmb",
                "is_regulator": true,
                "fru": "system/chassis/motherboard/bmc",
@@ -5007,17 +4912,17 @@
                      "id": "Rear_USB_p2_rail",
                      "configuration": {
                         "actions": [
-                           { "run_rule": "configure_common_tda38740_pmb_rule" },
+                           { "run_rule": "configure_common_controllerB_pmb_rule" },
                            { "set_device": "p0c0_5v0usb2_regulator_i2c" },
                            {
                               "if": {
                                  "condition": {
                                     "comments": [ "only run updates on latest c22"],
-                                    "run_rule": "is_tda38740_c22_rule"
+                                    "run_rule": "is_controllerB_c22_rule"
                                  },
                                  "then": [
                                     { "set_device": "p0c0_5v0usb2_regulator_pmb" },
-                                    { "run_rule": "configure_5v0usb_tda38740_c22_rule_pmb" }
+                                    { "run_rule": "configure_5v0usb_controllerB_c22_rule_pmb" }
                                  ]
                               }
                            } 
@@ -5029,24 +4934,24 @@
             },
             
             {
-               "comments": [ "P0-C0 5v0usb Phase 1 / IR35220"],
+               "comments": [ "P0-C0 5v0usb Phase 1 / phase"],
                "id": "p0c0_5v0usb_phase1",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/bmc",
                "i2c_interface": { "bus": 47, "address": "0x14" },
                "configuration": {
-                  "rule_id": "configure_5v0usb_ir35220_rule"
+                  "rule_id": "configure_5v0usb_phase_rule"
                }
             },
             
             {
-               "comments": [ "P0-C0 5v0usb Phase 2 / IR35220"],
+               "comments": [ "P0-C0 5v0usb Phase 2 / phase"],
                "id": "p0c0_5v0usb_phase2",
                "is_regulator": false,
                "fru": "system/chassis/motherboard/bmc",
                "i2c_interface": { "bus": 48, "address": "0x14" },
                "configuration": {
-                  "rule_id": "configure_5v0usb_ir35220_rule"
+                  "rule_id": "configure_5v0usb_phase_rule"
                }
             }
             
