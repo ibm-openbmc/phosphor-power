@@ -116,10 +116,10 @@
           "i2c_write_bytes": { "register": "0x2B", "values": [ "0x00", "0x00" ] }
         },
         {
-          "comments": [ "Set VOUT_MAX to 1.2V since for VDD the voltage",
+          "comments": [ "Set VOUT_MAX to 1.255V since for VDD the voltage",
                         "can go up to 1.1V so we want to raise this",
                         "limit above 1.1V so the regulator does not trip." ],
-          "i2c_write_bytes": { "register": "0x24", "values": [ "0x66", "0x02" ] }
+          "i2c_write_bytes": { "register": "0x24", "values": [ "0x83", "0x02" ] }
         },
         {
           "comments": [ "Set POWER_GOOD_ON for VDD to a value of 0.5V." ],
@@ -130,8 +130,8 @@
           "i2c_write_bytes": { "register": "0x5F", "values": [ "0xCD", "0x00" ] }
         },
         {
-          "comments": [ "Set VOUT_OV_WARN_LIMIT for VDD to a value of 1.25V." ],
-          "i2c_write_bytes": { "register": "0x42", "values": [ "0x80", "0x02" ] }
+          "comments": [ "Set VOUT_OV_WARN_LIMIT for VDD to a value of 1.30V." ],
+          "i2c_write_bytes": { "register": "0x42", "values": [ "0x9A", "0x02" ] }
         },
         {
           "comments": [ "Set VOUT_UV_WARN_LIMIT for VDD to a value of 0.45V." ],
