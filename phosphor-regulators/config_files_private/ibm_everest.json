@@ -115,7 +115,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x02", "0x03"]
+                  "values": ["0x04", "0xC0", "0x00", "0x04", "0x03"]
                }
             },
             {
@@ -197,7 +197,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x02", "0x03"]
+                  "register": "0x9A", "values": ["0x04", "0x03"]
                }
             },
             {
@@ -230,7 +230,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x02", "0x03"]
+                  "values": ["0x04", "0xDA", "0x00", "0x04", "0x03"]
                }
             }
             
@@ -360,6 +360,13 @@
                "comments": [ "VOUT_MAX = 1.275" ],
                "i2c_write_bytes": {
                   "register": "0x24", "values": ["0x8D", "0x02"]
+               }
+            },
+            {
+               "comments": [ "remove force_fixed_ovp setting" ],
+               "i2c_write_bytes": {
+                  "register": "0xD0",
+                  "values": ["0x04", "0x32", "0x00", "0x00", "0x96"]
                }
             }
          ]
