@@ -61,6 +61,10 @@
                   "v0x0302 20220310",
                   "     3V3IO = 3.450",
                   "     VPCIe PID poles update",
+                  "v0x0304 20220310",
+                  "     disable force_fixed_ovp setting",
+                  "v0x0306 20220503",
+                  "     VCS phase OV & reverse threshold",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
 
@@ -115,7 +119,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x04", "0x03"]
+                  "values": ["0x04", "0xC0", "0x00", "0x06", "0x03"]
                }
             },
             {
@@ -197,7 +201,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x04", "0x03"]
+                  "register": "0x9A", "values": ["0x06", "0x03"]
                }
             },
             {
@@ -230,7 +234,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x04", "0x03"]
+                  "values": ["0x04", "0xDA", "0x00", "0x06", "0x03"]
                }
             }
             
@@ -476,14 +480,14 @@
          "actions": [
             { "run_rule": "configure_common_phase_rule" },
             {
-               "comments": [ "OR'ing FET threshold = 4.25mV" ],
+               "comments": [ "REQ, OR'ing FET threshold" ],
                "i2c_write_byte": { "register": "0x26", 
-                                   "value": "0x11", "mask": "0x3F" }
+                                   "value": "0x1C", "mask": "0x3F" }
             },
             {
-               "comments": [ "OVP = 1200mV" ],
+               "comments": [ "REQ, OVP" ],
                "i2c_write_byte": { "register": "0x25", 
-                                   "value": "0x1E", "mask": "0x3F" }
+                                   "value": "0x3C", "mask": "0x3F" }
             },
             {
                "comments": [ "IINOC = 14A" ],
@@ -726,6 +730,12 @@
                "comments": [ "VOUT_DROOP = 0.508*2 mOhm" ],
                "i2c_write_bytes": {
                   "register": "0x28", "values": ["0x1A", "0x00"]
+               }
+            },
+            {
+               "comments": [ "REQ, VOUT_OV_WARN" ],
+               "i2c_write_bytes": {
+                  "register": "0x42", "values": ["0x80", "0x03"]
                }
             },
             {
@@ -1111,6 +1121,8 @@
          "comments": [ "Rule to collect Phase Fault Status" ],
          "id": "capture_phase_status_rule",
          "actions": [
+            {  "comments": [ "Other" ],
+               "i2c_capture_bytes": { "register": "0x50", "count": 2 } },
             {  "comments": [ "Faults Status" ],
                "i2c_capture_bytes": { "register": "0x52", "count": 2 } },
             {  "comments": [ "vdd, vdrv" ],
@@ -1125,6 +1137,8 @@
                "i2c_capture_bytes": { "register": "0x5C", "count": 2 } },
             {  "comments": [ "iin min/max" ],
                "i2c_capture_bytes": { "register": "0x5E", "count": 2 } },
+            {  "comments": [ "Other" ],
+               "i2c_capture_bytes": { "register": "0x6E", "count": 2 } },
             {  "comments": [ "ro_inputs" ],
                "i2c_capture_bytes": { "register": "0x76", "count": 2 } }
          ]
