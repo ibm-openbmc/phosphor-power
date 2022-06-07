@@ -65,6 +65,8 @@
                   "     disable force_fixed_ovp setting",
                   "v0x0306 20220503",
                   "     VCS phase OV & reverse threshold",
+                  "v0x0307 20220601",
+                  "     another VCS phase OV update",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
 
@@ -119,7 +121,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x06", "0x03"]
+                  "values": ["0x04", "0xC0", "0x00", "0x07", "0x03"]
                }
             },
             {
@@ -201,7 +203,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x06", "0x03"]
+                  "register": "0x9A", "values": ["0x07", "0x03"]
                }
             },
             {
@@ -234,7 +236,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x06", "0x03"]
+                  "values": ["0x04", "0xDA", "0x00", "0x07", "0x03"]
                }
             }
             
@@ -486,8 +488,8 @@
             },
             {
                "comments": [ "REQ, OVP" ],
-               "i2c_write_byte": { "register": "0x25", 
-                                   "value": "0x3C", "mask": "0x3F" }
+               "i2c_write_byte": { "register": "0x2F", 
+                                   "value": "0x10", "mask": "0x10" }
             },
             {
                "comments": [ "IINOC = 14A" ],
@@ -1140,7 +1142,9 @@
             {  "comments": [ "Other" ],
                "i2c_capture_bytes": { "register": "0x6E", "count": 2 } },
             {  "comments": [ "ro_inputs" ],
-               "i2c_capture_bytes": { "register": "0x76", "count": 2 } }
+               "i2c_capture_bytes": { "register": "0x76", "count": 2 } },
+            {  "comments": [ "USER" ],
+               "i2c_capture_bytes": { "register": "0x9A", "count": 2 } }
          ]
       },
       
