@@ -67,6 +67,8 @@
                   "     VCS phase OV & reverse threshold",
                   "v0x0307 20220601",
                   "     another VCS phase OV update",
+                  "v0x0309 20221010",
+                  "     VCS AVS transition rate = 1mV/us",
                   "",
                   "Don't use tabs in comments, JSON doesn't like it!"],
 
@@ -108,7 +110,7 @@
             }
          ]
       },
-      
+
       
       
       {
@@ -121,7 +123,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xC0", "0x00", "0x07", "0x03"]
+                  "values": ["0x04", "0xC0", "0x00", "0x09", "0x03"]
                }
             },
             {
@@ -203,7 +205,7 @@
             {
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": {
-                  "register": "0x9A", "values": ["0x07", "0x03"]
+                  "register": "0x9A", "values": ["0x09", "0x03"]
                }
             },
             {
@@ -236,7 +238,7 @@
                "comments": [ "Set as JSON version tracker" ],
                "i2c_write_bytes": { 
                   "register": "0xD0",
-                  "values": ["0x04", "0xDA", "0x00", "0x07", "0x03"]
+                  "values": ["0x04", "0xDA", "0x00", "0x09", "0x03"]
                }
             }
             
@@ -471,6 +473,13 @@
                "i2c_write_bytes": {
                   "register": "0xD0",
                   "values": ["0x04", "0x24", "0x04", "0x39", "0x60"]
+               }
+            },
+            {
+               "comments": [ "REQ, Set loop1 avs_transition rate = 1mV/us"],
+               "i2c_write_bytes": { 
+                  "register": "0xD0",
+                  "values": ["0x04", "0x4A", "0x04", "0x01", "0x01"]
                }
             }
          ]
