@@ -1151,8 +1151,9 @@ void PowerSupply::getInputVoltage(double& actualInputVoltage,
 void PowerSupply::checkAvailability()
 {
     bool origAvailability = available;
-    available = present && !hasInputFault() && !hasVINUVFault() &&
-                !hasPSKillFault() && !hasIoutOCFault();
+    bool faulted = isPowerOn(bus) &&
+                   (hasVINUVFault() || hasPSKillFault() || hasIoutOCFault());
+    available = present && !hasInputFault() && !faulted;
 
     if (origAvailability != available)
     {
