@@ -219,6 +219,8 @@ class Util : public UtilBase
 
 std::unique_ptr<GPIOInterfaceBase> createGPIO(const std::string& namedGpio);
 
+bool isPowerOn(sdbusplus::bus::bus& bus);
+
 class GPIOInterface : public GPIOInterfaceBase
 {
   public:

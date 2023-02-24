@@ -119,4 +119,21 @@ std::unique_ptr<GPIOInterfaceBase> createGPIO(const std::string& namedGpio)
     return GPIOInterface::createGPIO(namedGpio);
 }
 
+bool isPowerOn(sdbusplus::bus::bus& bus)
+{
+    try
+    {
+        auto method = bus.new_method_call(POWER_IFACE, POWER_OBJ_PATH,
+                                          POWER_IFACE, "getPowerState");
+        auto reply = bus.call(method);
+        int state = 0;
+        reply.read(state);
+
+        return state;
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+}
 } // namespace phosphor::power::psu
