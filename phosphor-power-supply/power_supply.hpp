@@ -10,6 +10,7 @@
 
 #include <gpiod.hpp>
 #include <sdbusplus/bus/match.hpp>
+#include <xyz/openbmc_project/Sensor/Value/server.hpp>
 
 #include <filesystem>
 #include <stdexcept>
@@ -45,6 +46,9 @@ static constexpr auto CC_KW_SIZE = 4;
 constexpr auto LOG_LIMIT = 3;
 constexpr auto DEGLITCH_LIMIT = 3;
 constexpr auto PGOOD_DEGLITCH_LIMIT = 5;
+
+using SensorInterface = sdbusplus::xyz::openbmc_project::Sensor::server::Value;
+using SensorObject = sdbusplus::server::object_t<SensorInterface>;
 
 /**
  * @class PowerSupply
@@ -516,6 +520,13 @@ class PowerSupply
         syncHistoryRequired = false;
     }
 
+    /**
+     * @brief Puts the input voltage rating on D-Bus.
+     *
+     * The rating is like 0, 110, 220.
+     */
+    void setInputVoltageRating();
+
   private:
     /** @brief systemd bus member */
     sdbusplus::bus_t& bus;
@@ -940,6 +951,15 @@ class PowerSupply
      * objects.
      **/
     std::string historyObjectPath;
+
+    /**
+     * @brief The D-Bus object for the input voltage rating
+     *
+     * It is updated at startup and power on.  If a power supply is
+     * added or removed after that, it does not need to be updated
+     * again (though that could be done as a future improvement).
+     */
+    std::unique_ptr<SensorObject> inputVoltageRatingIface;
 };
 
 } // namespace phosphor::power::psu
