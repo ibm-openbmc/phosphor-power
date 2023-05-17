@@ -156,7 +156,7 @@ bool UPS::findDevicePath()
     {
         // Loop through all entries in the directory where the file should exist
         std::string entryName{};
-        for (auto const& entry : fs::directory_iterator{deviceDirectory})
+        for (const auto& entry : fs::directory_iterator{deviceDirectory})
         {
             // If entry has expected prefix, exists, and is character device
             entryName = entry.path().filename().native();
