@@ -83,7 +83,6 @@ libsystemd_dep = dependency('libsystemd')
 servicedir = systemd.get_variable('systemdsystemunitdir')
 
 services = [
-    ['ibm-ups', 'ibm-ups.service'],
     ['supply-monitor', 'power-supply-monitor@.service'],
     ['sequencer-monitor', 'pseq-monitor-pgood.service'],
     ['sequencer-monitor', 'pseq-monitor.service'],
@@ -167,9 +166,6 @@ libpower_inc = include_directories('.')
 # Meson variables defined there.
 subdir('tools/i2c')
 
-if get_option('ibm-ups')
-    subdir('ibm-ups')
-endif
 if get_option('regulators')
     subdir('phosphor-regulators')
     install_data('reset_voltage_regulators',
