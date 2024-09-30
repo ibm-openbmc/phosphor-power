@@ -146,6 +146,7 @@ class PowerSupply
         ps12VcsFault = 0;
         psCS12VFault = 0;
         faultLogged = false;
+        currentShareWarningReported = false;
     }
 
     /**
@@ -1056,6 +1057,11 @@ class PowerSupply
      * @param[out] vpdStr - The VPD string associated with the keyword.
      */
     void getPsuVpdFromDbus(const std::string& keyword, std::string& vpdStr);
+
+    /**
+     * @brief 12V current share warning reported flag.
+     */
+    bool currentShareWarningReported = false;
 };
 
 } // namespace phosphor::power::psu
