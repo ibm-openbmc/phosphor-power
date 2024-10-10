@@ -157,6 +157,7 @@ class PowerSupply
         ps12VcsFault = 0;
         psCS12VFault = 0;
         faultLogged = false;
+        currentShareWarningReported = false;
     }
 
     /**
@@ -1073,6 +1074,11 @@ class PowerSupply
      * @brief The device driver name
      */
     std::string driverName;
+
+    /**
+     * @brief 12V current share warning reported flag.
+     */
+    bool currentShareWarningReported = false;
 };
 
 } // namespace phosphor::power::psu

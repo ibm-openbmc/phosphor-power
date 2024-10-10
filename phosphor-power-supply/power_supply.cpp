@@ -499,6 +499,25 @@ void PowerSupply::analyzeMFRFault()
     {
         if (mfrFault < DEGLITCH_LIMIT)
         {
+            if ((statusMFR & 0x80) && driverName == IBMCFFPS_DD_NAME)
+            {
+                // Report current share warning once per boot
+                if (!currentShareWarningReported)
+                {
+                    log<level::INFO>(
+                        fmt::format("{} 12V current share warning: "
+                                    "STATUS_WORD = {:#06x} "
+                                    "STATUS_MFR_SPECIFIC = {:#04x}",
+                                    shortName, statusWord, statusMFR)
+                            .c_str());
+                    currentShareWarningReported = true;
+                }
+                statusMFR = statusMFR & 0x7F;
+            }
+            if (!statusMFR)
+            {
+                return;
+            }
             if (statusWord != statusWordOld)
             {
                 log<level::ERR>(fmt::format("{} MFR fault: "
