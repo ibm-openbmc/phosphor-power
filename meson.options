@@ -69,6 +69,11 @@ option(
     description: 'Enable support for power supply monitoring',
 )
 option(
+    'supply-monitor-ng',
+    type: 'boolean',
+    description: 'Enable support for power supply monitoring',
+)
+option(
     'regulators',
     type: 'boolean',
     description: 'Enable support for voltage regulator control',
