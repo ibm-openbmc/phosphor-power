@@ -17,6 +17,7 @@
 
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/Device/error.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
@@ -43,6 +44,28 @@ struct FileCloser
         fclose(fp);
     }
 };
+
+/**
+ * @brief Returns the canonical path if it exists
+ *        otherwise returns the path passed in.
+ *
+ * @param[in] path - The path to check
+ *
+ * @return fs::path - Either the canonical or original path
+ */
+static fs::path tryCanonical(const fs::path& path)
+{
+    std::error_code ec;
+    auto canonical = fs::canonical(path, ec);
+
+    if (ec)
+    {
+        lg2::error("Could not get canonical path from {PATH}", "PATH", path);
+        return path;
+    }
+
+    return canonical;
+}
 
 std::string PMBus::insertPageNum(const std::string& templateName, size_t page)
 {
@@ -161,7 +184,7 @@ bool PMBus::readBit(const std::string& name, Type type)
 
         elog<ReadFailure>(
             metadata::CALLOUT_ERRNO(rc),
-            metadata::CALLOUT_DEVICE_PATH(fs::canonical(basePath).c_str()));
+            metadata::CALLOUT_DEVICE_PATH(tryCanonical(basePath).c_str()));
     }
 
     return value != 0;
@@ -204,7 +227,7 @@ uint64_t PMBus::read(const std::string& name, Type type, bool errTrace)
 
             elog<ReadFailure>(
                 metadata::CALLOUT_ERRNO(rc),
-                metadata::CALLOUT_DEVICE_PATH(fs::canonical(basePath).c_str()));
+                metadata::CALLOUT_DEVICE_PATH(tryCanonical(basePath).c_str()));
         }
         else
         {
@@ -242,7 +265,7 @@ std::string PMBus::readString(const std::string& name, Type type)
 
         elog<ReadFailure>(
             metadata::CALLOUT_ERRNO(rc),
-            metadata::CALLOUT_DEVICE_PATH(fs::canonical(basePath).c_str()));
+            metadata::CALLOUT_DEVICE_PATH(tryCanonical(basePath).c_str()));
     }
 
     return data;
@@ -284,7 +307,7 @@ std::vector<uint8_t> PMBus::readBinary(const std::string& name, Type type,
 
                 elog<ReadFailure>(metadata::CALLOUT_ERRNO(rc),
                                   metadata::CALLOUT_DEVICE_PATH(
-                                      fs::canonical(basePath).c_str()));
+                                      tryCanonical(basePath).c_str()));
             }
         }
         return data;
@@ -320,7 +343,7 @@ void PMBus::write(const std::string& name, int value, Type type)
 
         elog<WriteFailure>(
             metadata::CALLOUT_ERRNO(rc),
-            metadata::CALLOUT_DEVICE_PATH(fs::canonical(basePath).c_str()));
+            metadata::CALLOUT_DEVICE_PATH(tryCanonical(basePath).c_str()));
     }
 }
 
@@ -358,7 +381,7 @@ void PMBus::writeBinary(const std::string& name, std::vector<uint8_t> data,
 
         elog<WriteFailure>(
             metadata::CALLOUT_ERRNO(rc),
-            metadata::CALLOUT_DEVICE_PATH(fs::canonical(basePath).c_str()));
+            metadata::CALLOUT_DEVICE_PATH(tryCanonical(basePath).c_str()));
     }
 }
 
