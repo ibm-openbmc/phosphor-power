@@ -196,9 +196,10 @@ subdir('tools/i2c')
 
 if get_option('regulators')
     subdir('phosphor-regulators')
-    install_data('reset_voltage_regulators',
-            install_mode: 'rwxr-xr-x',
-            install_dir: get_option('bindir')
+    install_data(
+        'reset_voltage_regulators',
+        install_mode: 'rwxr-xr-x',
+        install_dir: get_option('bindir'),
     )
 endif
 if get_option('sequencer-monitor')
